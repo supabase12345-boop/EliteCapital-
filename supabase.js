@@ -1,13 +1,13 @@
 // ===================================
-// supabase.js - Elite Capital (نسخة كاملة مع دعم الصور وحذف الدردشة)
+// supabase.js - Elite Capital (نسخة محدثة مع دعم الصور والهدايا)
 // ===================================
 
-const SUPABASE_URL = 'https://xrjwjzwqptshnbzjbzoj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhyandqendxcHRzaG5iempiem9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjA4MzksImV4cCI6MjA4NzU5NjgzOX0._0lYgQHfljPrBqOMLsRwgILEVs62sib1KqCNIOiSQ9I';
+const SUPABASE_URL = 'https://macbjaiunubocfyhvbvd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1hY2JqYWl1bnVib2NmeWh2YnZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjc2OTcsImV4cCI6MjA4NzYwMzY5N30.s7s6xhgkbfLFubffKeilZwkAJuttu_GKPo8xJPNUe-M';
 
 let supabaseClient = null;
 
-// ========== حل مشكلة LockManager نهائياً ==========
+// ========== حل مشكلة LockManager ==========
 (function fixLockManager() {
     if (navigator && navigator.locks) {
         try {
@@ -16,16 +16,14 @@ let supabaseClient = null;
                 get: () => undefined,
                 configurable: true
             });
-            console.log('🔓 تم تعطيل LockManager');
+            
             setTimeout(() => {
                 Object.defineProperty(navigator, 'locks', {
                     get: () => originalLocks,
                     configurable: true
                 });
             }, 5000);
-        } catch (e) {
-            console.log('لا يمكن تعديل locks');
-        }
+        } catch (e) {}
     }
 })();
 
@@ -63,652 +61,6 @@ function generateReferralCode(username) {
     return `${cleanUsername}${random}${timestamp}`.substring(0, 12);
 }
 
-// ========== دوال رفع الصور ==========
-async function uploadImage(file, folder = 'chat_images') {
-    try {
-        if (!file) throw new Error('الملف مطلوب');
-        
-        // التحقق من نوع الملف
-        if (!file.type.startsWith('image/')) {
-            throw new Error('الملف يجب أن يكون صورة');
-        }
-        
-        // التحقق من حجم الملف (5 ميجابايت كحد أقصى)
-        const maxSize = 5 * 1024 * 1024; // 5MB
-        if (file.size > maxSize) {
-            throw new Error('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
-        }
-        
-        // إنشاء اسم فريد للملف
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${folder}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
-        // رفع الملف إلى Supabase Storage
-        const { data, error } = await supabaseClient.storage
-            .from('uploads')
-            .upload(fileName, file);
-        
-        if (error) throw error;
-        
-        // الحصول على الرابط العام
-        const { data: urlData } = supabaseClient.storage
-            .from('uploads')
-            .getPublicUrl(fileName);
-        
-        return { 
-            success: true, 
-            data: {
-                path: fileName,
-                url: urlData.publicUrl,
-                name: file.name,
-                size: file.size,
-                type: file.type
-            }
-        };
-    } catch (error) {
-        console.error('خطأ في رفع الصورة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function deleteImage(imagePath) {
-    try {
-        if (!imagePath) throw new Error('مسار الصورة مطلوب');
-        
-        const { error } = await supabaseClient.storage
-            .from('uploads')
-            .remove([imagePath]);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في حذف الصورة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ========== نظام الدردشة المباشرة المتطور ==========
-
-// بدء محادثة جديدة
-async function startLiveChat(userId) {
-    try {
-        console.log('بدء محادثة جديدة للمستخدم:', userId);
-        
-        // التحقق من وجود محادثة نشطة
-        const { data: existingChat, error: checkError } = await supabaseClient
-            .from('live_chats')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .maybeSingle();
-        
-        if (checkError) throw checkError;
-        
-        if (existingChat) {
-            return { success: true, data: existingChat, isNew: false };
-        }
-        
-        // إنشاء محادثة جديدة
-        const { data: newChat, error: createError } = await supabaseClient
-            .from('live_chats')
-            .insert([{
-                user_id: userId,
-                status: 'active',
-                started_at: new Date().toISOString(),
-                last_message_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-        
-        if (createError) throw createError;
-        
-        console.log('✅ تم إنشاء محادثة جديدة:', newChat.id);
-        
-        return { success: true, data: newChat, isNew: true };
-    } catch (error) {
-        console.error('خطأ في بدء المحادثة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// إرسال رسالة نصية
-async function sendChatMessage(chatId, userId, message) {
-    try {
-        if (!message || !message.trim()) {
-            throw new Error('الرسالة لا يمكن أن تكون فارغة');
-        }
-        
-        console.log('إرسال رسالة نصية:', { chatId, userId, message });
-        
-        const { data: newMessage, error: msgError } = await supabaseClient
-            .from('chat_messages')
-            .insert([{
-                chat_id: chatId,
-                user_id: userId,
-                message: message.trim(),
-                message_type: 'text',
-                created_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-        
-        if (msgError) throw msgError;
-        
-        // تحديث وقت آخر رسالة
-        await supabaseClient
-            .from('live_chats')
-            .update({ last_message_at: new Date().toISOString() })
-            .eq('id', chatId);
-        
-        return { success: true, data: newMessage };
-    } catch (error) {
-        console.error('خطأ في إرسال الرسالة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// إرسال رسالة صورة
-async function sendChatImage(chatId, userId, imageFile) {
-    try {
-        console.log('رفع صورة وإرسالها:', { chatId, userId });
-        
-        // رفع الصورة أولاً
-        const uploadResult = await uploadImage(imageFile, 'chat_images');
-        
-        if (!uploadResult.success) {
-            throw new Error(uploadResult.error);
-        }
-        
-        const imageData = uploadResult.data;
-        
-        // إرسال الرسالة مع الصورة
-        const { data: newMessage, error: msgError } = await supabaseClient
-            .from('chat_messages')
-            .insert([{
-                chat_id: chatId,
-                user_id: userId,
-                message: '🖼️ صورة',
-                message_type: 'image',
-                image_url: imageData.url,
-                image_path: imageData.path,
-                image_name: imageData.name,
-                created_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-        
-        if (msgError) {
-            // إذا فشل إرسال الرسالة، احذف الصورة المرفوعة
-            await deleteImage(imageData.path);
-            throw msgError;
-        }
-        
-        // تحديث وقت آخر رسالة
-        await supabaseClient
-            .from('live_chats')
-            .update({ last_message_at: new Date().toISOString() })
-            .eq('id', chatId);
-        
-        return { success: true, data: newMessage, imageUrl: imageData.url };
-    } catch (error) {
-        console.error('خطأ في إرسال الصورة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// جلب رسائل المحادثة
-async function getChatMessages(chatId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('chat_messages')
-            .select(`
-                *,
-                users:user_id (
-                    id,
-                    name,
-                    is_admin
-                )
-            `)
-            .eq('chat_id', chatId)
-            .order('created_at', { ascending: true });
-        
-        if (error) throw error;
-        
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في جلب الرسائل:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// حذف رسالة معينة (للمسؤول فقط)
-async function deleteChatMessage(messageId, adminId, isAdmin = true) {
-    try {
-        if (!isAdmin) {
-            throw new Error('غير مصرح لك بحذف الرسائل');
-        }
-        
-        // جلب الرسالة أولاً لمعرفة إذا كانت تحتوي على صورة
-        const { data: message, error: fetchError } = await supabaseClient
-            .from('chat_messages')
-            .select('*')
-            .eq('id', messageId)
-            .single();
-        
-        if (fetchError) throw fetchError;
-        
-        // إذا كانت الرسالة تحتوي على صورة، احذفها من التخزين
-        if (message.message_type === 'image' && message.image_path) {
-            await deleteImage(message.image_path);
-        }
-        
-        // حذف الرسالة من قاعدة البيانات
-        const { error: deleteError } = await supabaseClient
-            .from('chat_messages')
-            .delete()
-            .eq('id', messageId);
-        
-        if (deleteError) throw deleteError;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في حذف الرسالة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// حذف محادثة كاملة (للمسؤول فقط)
-async function deleteChat(chatId, adminId, isAdmin = true) {
-    try {
-        if (!isAdmin) {
-            throw new Error('غير مصرح لك بحذف المحادثات');
-        }
-        
-        // جلب جميع رسائل المحادثة
-        const { data: messages, error: messagesError } = await supabaseClient
-            .from('chat_messages')
-            .select('*')
-            .eq('chat_id', chatId);
-        
-        if (messagesError) throw messagesError;
-        
-        // حذف جميع الصور المرتبطة
-        for (const message of messages || []) {
-            if (message.message_type === 'image' && message.image_path) {
-                await deleteImage(message.image_path);
-            }
-        }
-        
-        // حذف الرسائل
-        const { error: deleteMessagesError } = await supabaseClient
-            .from('chat_messages')
-            .delete()
-            .eq('chat_id', chatId);
-        
-        if (deleteMessagesError) throw deleteMessagesError;
-        
-        // حذف المحادثة
-        const { error: deleteChatError } = await supabaseClient
-            .from('live_chats')
-            .delete()
-            .eq('id', chatId);
-        
-        if (deleteChatError) throw deleteChatError;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في حذف المحادثة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// حذف جميع المحادثات القديمة (للمسؤول فقط)
-async function deleteOldChats(daysOld = 30, adminId, isAdmin = true) {
-    try {
-        if (!isAdmin) {
-            throw new Error('غير مصرح لك بحذف المحادثات');
-        }
-        
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-        
-        // جلب المحادثات القديمة
-        const { data: oldChats, error: fetchError } = await supabaseClient
-            .from('live_chats')
-            .select('id')
-            .lt('created_at', cutoffDate.toISOString())
-            .eq('status', 'closed');
-        
-        if (fetchError) throw fetchError;
-        
-        let deletedCount = 0;
-        
-        // حذف كل محادثة قديمة
-        for (const chat of oldChats || []) {
-            const result = await deleteChat(chat.id, adminId, isAdmin);
-            if (result.success) deletedCount++;
-        }
-        
-        return { 
-            success: true, 
-            data: { 
-                deletedCount,
-                message: `تم حذف ${deletedCount} محادثة قديمة`
-            }
-        };
-    } catch (error) {
-        console.error('خطأ في حذف المحادثات القديمة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// تعليم الرسائل كمقروءة
-async function markMessagesAsRead(chatId, userId) {
-    try {
-        const { error } = await supabaseClient
-            .from('chat_messages')
-            .update({ 
-                is_read: true,
-                read_at: new Date().toISOString()
-            })
-            .eq('chat_id', chatId)
-            .neq('user_id', userId)
-            .eq('is_read', false);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في تحديث حالة القراءة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// جلب المحادثات النشطة مع تفاصيلها
-async function getActiveChats() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('live_chats')
-            .select(`
-                *,
-                users:user_id (
-                    id,
-                    name,
-                    email,
-                    phone
-                )
-            `)
-            .eq('status', 'active')
-            .order('last_message_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        // إضافة آخر رسالة وعدد غير المقروء لكل محادثة
-        for (let chat of data || []) {
-            // آخر رسالة
-            const { data: lastMessage } = await supabaseClient
-                .from('chat_messages')
-                .select('*')
-                .eq('chat_id', chat.id)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
-            
-            chat.last_message = lastMessage;
-            
-            // عدد الرسائل غير المقروءة
-            const { count } = await supabaseClient
-                .from('chat_messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('chat_id', chat.id)
-                .eq('is_read', false)
-                .neq('user_id', chat.admin_id);
-            
-            chat.unread_count = count || 0;
-        }
-        
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في جلب المحادثات النشطة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// انضمام مسؤول للمحادثة
-async function joinChat(chatId, adminId) {
-    try {
-        const { error } = await supabaseClient
-            .from('live_chats')
-            .update({ 
-                admin_id: adminId,
-                updated_at: new Date().toISOString()
-            })
-            .eq('id', chatId);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في انضمام المسؤول:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// إغلاق محادثة
-async function closeChat(chatId) {
-    try {
-        const { error } = await supabaseClient
-            .from('live_chats')
-            .update({ 
-                status: 'closed',
-                ended_at: new Date().toISOString()
-            })
-            .eq('id', chatId);
-        
-        if (error) throw error;
-        
-        return { success: true };
-    } catch (error) {
-        console.error('خطأ في إنهاء المحادثة:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// جلب محادثة المستخدم النشطة
-async function getUserActiveChat(userId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('live_chats')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .maybeSingle();
-        
-        if (error) throw error;
-        
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في جلب محادثة المستخدم:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ========== نظام التحقق من الدفع والتمييز بين المشتركين ==========
-
-// التحقق من حالة دفع المستخدم
-async function checkPaymentStatus(userId, packageId) {
-    try {
-        const { data: pendingPackage, error: pendingError } = await supabaseClient
-            .from('pending_packages')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('package_id', packageId)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-        if (pendingError) throw pendingError;
-
-        const { data: subscription, error: subError } = await supabaseClient
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('package_id', packageId)
-            .eq('status', 'active')
-            .maybeSingle();
-
-        if (subError) throw subError;
-
-        let status = 'none';
-        let paymentProof = null;
-        let createdAt = null;
-
-        if (subscription) {
-            status = 'approved';
-            paymentProof = 'مدفوع ✓';
-            createdAt = subscription.created_at;
-        } else if (pendingPackage) {
-            status = pendingPackage.status;
-            paymentProof = pendingPackage.payment_proof ? '📎 مع إثبات' : '⏳ بدون إثبات';
-            createdAt = pendingPackage.created_at;
-        }
-
-        return {
-            success: true,
-            data: {
-                status,
-                hasPaymentProof: !!pendingPackage?.payment_proof,
-                paymentProof,
-                createdAt,
-                pendingPackage,
-                subscription
-            }
-        };
-    } catch (error) {
-        console.error('خطأ في التحقق من حالة الدفع:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// جلب جميع الطلبات مع تصنيفها
-async function getAllPendingPackagesWithProof() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('pending_packages')
-            .select(`
-                *,
-                users:user_id (
-                    name,
-                    email,
-                    phone,
-                    balance
-                )
-            `)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const classified = {
-            withProof: [],
-            withoutProof: [],
-            all: data || []
-        };
-
-        (data || []).forEach(pkg => {
-            if (pkg.payment_proof) {
-                classified.withProof.push(pkg);
-            } else {
-                classified.withoutProof.push(pkg);
-            }
-        });
-
-        return { success: true, data: classified };
-    } catch (error) {
-        console.error('خطأ في جلب الطلبات:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// تحديث حالة الدفع يدوياً
-async function updatePaymentStatus(pendingId, hasProof, adminId) {
-    try {
-        const updates = {
-            payment_proof: hasProof ? 'manual_' + Date.now() : null,
-            processed_by: adminId,
-            updated_at: new Date().toISOString()
-        };
-
-        const { data, error } = await supabaseClient
-            .from('pending_packages')
-            .update(updates)
-            .eq('id', pendingId)
-            .select()
-            .single();
-
-        if (error) throw error;
-
-        return { success: true, data };
-    } catch (error) {
-        console.error('خطأ في تحديث حالة الدفع:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// جلب إحصائيات الدفع
-async function getPaymentStats() {
-    try {
-        const { data: allPackages, error } = await supabaseClient
-            .from('pending_packages')
-            .select('*');
-
-        if (error) throw error;
-
-        const stats = {
-            total: allPackages?.length || 0,
-            withProof: allPackages?.filter(p => p.payment_proof).length || 0,
-            withoutProof: allPackages?.filter(p => !p.payment_proof).length || 0,
-            pending: allPackages?.filter(p => p.status === 'pending').length || 0,
-            approved: allPackages?.filter(p => p.status === 'approved').length || 0,
-            rejected: allPackages?.filter(p => p.status === 'rejected').length || 0
-        };
-
-        return { success: true, data: stats };
-    } catch (error) {
-        console.error('خطأ في جلب إحصائيات الدفع:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// جلب المستخدمين الذين دفعوا
-async function getUsersWithPayment() {
-    try {
-        const { data: users, error: usersError } = await supabaseClient
-            .from('users')
-            .select(`
-                *,
-                subscriptions:subscriptions(
-                    id,
-                    package_name,
-                    amount,
-                    start_date,
-                    end_date,
-                    status
-                )
-            `)
-            .eq('subscriptions.status', 'active');
-
-        if (usersError) throw usersError;
-
-        const paidUsers = users?.filter(u => u.subscriptions && u.subscriptions.length > 0) || [];
-
-        return { success: true, data: paidUsers };
-    } catch (error) {
-        console.error('خطأ في جلب المستخدمين المدفوعين:', error);
-        return { success: false, error: error.message };
-    }
-}
-
 // ========== المستخدمين ==========
 async function registerUser(userData) {
     try {
@@ -719,10 +71,6 @@ async function registerUser(userData) {
             .select('id')
             .or(`email.eq.${userData.email},username.eq.${userData.username}`)
             .maybeSingle();
-        
-        if (checkError) {
-            console.error('خطأ في التحقق من المستخدم:', checkError);
-        }
         
         if (existing) {
             throw new Error('البريد الإلكتروني أو اسم المستخدم مستخدم مسبقاً');
@@ -740,7 +88,6 @@ async function registerUser(userData) {
             
             if (referrer) {
                 referredBy = userData.referralCode;
-                console.log('✅ كود إحالة صحيح:', referredBy);
             }
         }
         
@@ -760,10 +107,11 @@ async function registerUser(userData) {
             joined_date: new Date().toISOString(),
             last_login: new Date().toISOString(),
             created_at: new Date().toISOString(),
-            wallet_address: ''
+            wallet_address: '',
+            last_claim_time: null,
+            referral_earnings: 0,
+            referral_count: 0
         };
-        
-        console.log('بيانات المستخدم الجديد:', newUserData);
         
         const { data: newUser, error } = await supabaseClient
             .from('users')
@@ -771,12 +119,7 @@ async function registerUser(userData) {
             .select()
             .single();
         
-        if (error) {
-            console.error('خطأ في إدراج المستخدم:', error);
-            throw new Error(error.message || 'فشل إنشاء الحساب');
-        }
-        
-        console.log('✅ تم إنشاء المستخدم بنجاح:', newUser.id);
+        if (error) throw error;
         
         return { success: true, data: newUser };
     } catch (error) {
@@ -787,30 +130,16 @@ async function registerUser(userData) {
 
 async function loginUser(usernameOrEmail, password) {
     try {
-        console.log('محاولة تسجيل دخول:', usernameOrEmail);
-        
         const { data: user, error } = await supabaseClient
             .from('users')
             .select('*')
             .or(`email.eq.${usernameOrEmail},username.eq.${usernameOrEmail}`)
             .maybeSingle();
         
-        if (error) {
-            console.error('خطأ في البحث عن المستخدم:', error);
-            throw error;
-        }
-        
-        if (!user) {
-            throw new Error('المستخدم غير موجود');
-        }
-        
-        if (user.password !== password) {
-            throw new Error('كلمة المرور غير صحيحة');
-        }
-        
-        if (user.status === 'banned') {
-            throw new Error('حسابك محظور');
-        }
+        if (error) throw error;
+        if (!user) throw new Error('المستخدم غير موجود');
+        if (user.password !== password) throw new Error('كلمة المرور غير صحيحة');
+        if (user.status === 'banned') throw new Error('حسابك محظور');
         
         await supabaseClient
             .from('users')
@@ -819,10 +148,8 @@ async function loginUser(usernameOrEmail, password) {
         
         await addLoginActivity(user.id);
         
-        console.log('✅ تم تسجيل الدخول بنجاح:', user.email);
         return { success: true, data: user };
     } catch (error) {
-        console.error('خطأ في تسجيل الدخول:', error);
         return { success: false, error: error.message };
     }
 }
@@ -838,7 +165,6 @@ async function getUserById(id) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب المستخدم:', error);
         return { success: false, error: error.message };
     }
 }
@@ -858,7 +184,6 @@ async function updateUser(id, updates) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في تحديث المستخدم:', error);
         return { success: false, error: error.message };
     }
 }
@@ -873,7 +198,6 @@ async function getAllUsers() {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب المستخدمين:', error);
         return { success: false, error: error.message };
     }
 }
@@ -889,10 +213,8 @@ async function updateUserStatus(id, status) {
             .eq('id', id);
         
         if (error) throw error;
-        
         return { success: true };
     } catch (error) {
-        console.error('خطأ في تحديث حالة المستخدم:', error);
         return { success: false, error: error.message };
     }
 }
@@ -909,7 +231,6 @@ async function getAllPackages() {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب الباقات:', error);
         return { success: false, error: error.message };
     }
 }
@@ -925,7 +246,6 @@ async function getPackageById(id) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب الباقة:', error);
         return { success: false, error: error.message };
     }
 }
@@ -933,11 +253,6 @@ async function getPackageById(id) {
 async function createPackage(packageData) {
     try {
         const profitPercentage = (packageData.dailyProfit / packageData.price) * 100;
-        
-        if (!packageData.name) throw new Error('اسم الباقة مطلوب');
-        if (!packageData.price || packageData.price <= 0) throw new Error('السعر يجب أن يكون أكبر من 0');
-        if (!packageData.dailyProfit || packageData.dailyProfit <= 0) throw new Error('الربح اليومي يجب أن يكون أكبر من 0');
-        if (!packageData.duration || packageData.duration <= 0) throw new Error('المدة يجب أن تكون أكبر من 0');
         
         const { data, error } = await supabaseClient
             .from('packages')
@@ -957,41 +272,14 @@ async function createPackage(packageData) {
             .single();
         
         if (error) throw error;
-        
-        console.log('✅ تم إنشاء الباقة بنجاح:', data);
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في إنشاء الباقة:', error);
         return { success: false, error: error.message };
     }
 }
 
 async function updatePackage(id, updates) {
     try {
-        if (updates.price && updates.dailyProfit) {
-            updates.profit_percentage = (updates.dailyProfit / updates.price) * 100;
-        } else if (updates.price && !updates.dailyProfit) {
-            const { data: pkg } = await supabaseClient
-                .from('packages')
-                .select('daily_profit')
-                .eq('id', id)
-                .single();
-            
-            if (pkg) {
-                updates.profit_percentage = (pkg.daily_profit / updates.price) * 100;
-            }
-        } else if (!updates.price && updates.dailyProfit) {
-            const { data: pkg } = await supabaseClient
-                .from('packages')
-                .select('price')
-                .eq('id', id)
-                .single();
-            
-            if (pkg) {
-                updates.profit_percentage = (updates.dailyProfit / pkg.price) * 100;
-            }
-        }
-        
         const { error } = await supabaseClient
             .from('packages')
             .update({
@@ -1003,7 +291,6 @@ async function updatePackage(id, updates) {
         if (error) throw error;
         return { success: true };
     } catch (error) {
-        console.error('خطأ في تحديث الباقة:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1018,7 +305,6 @@ async function deletePackage(id) {
         if (error) throw error;
         return { success: true };
     } catch (error) {
-        console.error('خطأ في حذف الباقة:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1026,34 +312,17 @@ async function deletePackage(id) {
 // ========== طلبات الاشتراك ==========
 async function createPendingPackage(pendingData) {
     try {
-        console.log('📦 بدء إنشاء طلب اشتراك:', pendingData);
-        
-        if (!pendingData.userId) throw new Error('معرف المستخدم مطلوب');
-        if (!pendingData.packageId) throw new Error('معرف الباقة مطلوب');
-        if (!pendingData.amount) throw new Error('المبلغ مطلوب');
-        
-        const { data: user, error: userError } = await supabaseClient
+        const { data: user } = await supabaseClient
             .from('users')
             .select('id, name, email, phone, referred_by')
             .eq('id', pendingData.userId)
             .single();
         
-        if (userError || !user) throw new Error('المستخدم غير موجود');
-        
-        const { data: pkg, error: pkgError } = await supabaseClient
+        const { data: pkg } = await supabaseClient
             .from('packages')
             .select('id, name, category, duration, duration_type, daily_profit, price')
             .eq('id', pendingData.packageId)
             .single();
-        
-        if (pkgError || !pkg) throw new Error('الباقة غير موجودة');
-        
-        const amountNum = parseFloat(pendingData.amount);
-        const priceNum = parseFloat(pkg.price);
-        
-        if (Math.abs(amountNum - priceNum) > 0.01) {
-            throw new Error('المبلغ غير مطابق لسعر الباقة');
-        }
         
         const insertData = {
             user_id: user.id,
@@ -1066,14 +335,12 @@ async function createPendingPackage(pendingData) {
             package_duration: pkg.duration || 30,
             package_duration_type: pkg.duration_type || 'day',
             package_daily_profit: pkg.daily_profit || 0,
-            amount: priceNum,
+            amount: pkg.price,
             payment_proof: pendingData.paymentProof || null,
             wallet_address: pendingData.walletAddress || 'TYmk60K9JvCqS7Fqy6BpWpZp8hLpVHw7D',
             network: 'TRC20',
             transaction_hash: pendingData.paymentProof ? 'PROOF_' + Date.now() : null,
             referred_by: user.referred_by || null,
-            fast_approval: !!pendingData.paymentProof,
-            estimated_activation: pendingData.paymentProof ? 'ساعة واحدة' : '3-6 ساعات',
             status: 'pending',
             created_at: new Date().toISOString()
         };
@@ -1084,22 +351,13 @@ async function createPendingPackage(pendingData) {
             .select()
             .single();
         
-        if (error) {
-            console.error('❌ خطأ من قاعدة البيانات:', error);
-            throw error;
-        }
+        if (error) throw error;
         
-        console.log('✅ تم حفظ الطلب بنجاح:', data);
-        
-        await addSubscriptionActivity(user.id, priceNum, pkg.name, 'pending');
+        await addSubscriptionActivity(user.id, pkg.price, pkg.name, 'pending');
         
         return { success: true, data };
     } catch (error) {
-        console.error('❌ خطأ في إنشاء طلب الاشتراك:', error);
-        return { 
-            success: false, 
-            error: error.message || 'فشل تقديم الطلب. يرجى المحاولة مرة أخرى.'
-        };
+        return { success: false, error: error.message };
     }
 }
 
@@ -1114,12 +372,10 @@ async function getPendingPackages() {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب الطلبات:', error);
         return { success: false, error: error.message };
     }
 }
 
-// ========== الموافقة على طلب اشتراك ==========
 async function approvePendingPackage(id, adminId) {
     try {
         const { data: pending, error: fetchError } = await supabaseClient
@@ -1129,15 +385,12 @@ async function approvePendingPackage(id, adminId) {
             .single();
         
         if (fetchError) throw fetchError;
-        if (!pending) throw new Error('الطلب غير موجود');
         
-        const { data: pkg, error: pkgError } = await supabaseClient
+        const { data: pkg } = await supabaseClient
             .from('packages')
             .select('duration, duration_type, daily_profit')
             .eq('id', pending.package_id)
             .single();
-        
-        if (pkgError) throw pkgError;
         
         const startDate = new Date();
         const endDate = new Date();
@@ -1178,6 +431,7 @@ async function approvePendingPackage(id, adminId) {
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
                 status: 'active',
+                last_claim_date: null,
                 created_at: new Date().toISOString()
             }])
             .select()
@@ -1214,19 +468,12 @@ async function approvePendingPackage(id, adminId) {
         
         return { success: true, data: subscription };
     } catch (error) {
-        console.error('خطأ في قبول الطلب:', error);
         return { success: false, error: error.message };
     }
 }
 
 async function rejectPendingPackage(id, reason, adminId) {
     try {
-        const { data: pending } = await supabaseClient
-            .from('pending_packages')
-            .select('user_id, package_name, amount')
-            .eq('id', id)
-            .single();
-        
         const { error } = await supabaseClient
             .from('pending_packages')
             .update({ 
@@ -1239,13 +486,156 @@ async function rejectPendingPackage(id, reason, adminId) {
         
         if (error) throw error;
         
-        if (pending) {
-            await addSubscriptionActivity(pending.user_id, pending.amount, pending.package_name, 'rejected');
-        }
-        
         return { success: true };
     } catch (error) {
-        console.error('خطأ في رفض الطلب:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ========== نظام المطالبة بالأرباح اليومية ==========
+async function claimDailyProfit(userId) {
+    try {
+        const { data: subscription, error: subError } = await supabaseClient
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (subError || !subscription) {
+            throw new Error('لا يوجد اشتراك نشط');
+        }
+        
+        const now = new Date();
+        const lastClaim = subscription.last_claim_date ? new Date(subscription.last_claim_date) : null;
+        
+        if (lastClaim) {
+            const hoursSinceLastClaim = (now - lastClaim) / (1000 * 60 * 60);
+            if (hoursSinceLastClaim < 24) {
+                const hoursLeft = 24 - hoursSinceLastClaim;
+                throw new Error(`يمكنك المطالبة بعد ${Math.ceil(hoursLeft)} ساعة`);
+            }
+        }
+        
+        const profitAmount = subscription.daily_profit;
+        
+        const { data: user } = await supabaseClient
+            .from('users')
+            .select('balance, total_earned')
+            .eq('id', userId)
+            .single();
+        
+        await supabaseClient
+            .from('users')
+            .update({ 
+                balance: (user.balance || 0) + profitAmount,
+                total_earned: (user.total_earned || 0) + profitAmount
+            })
+            .eq('id', userId);
+        
+        await supabaseClient
+            .from('subscriptions')
+            .update({ 
+                last_claim_date: now.toISOString()
+            })
+            .eq('id', subscription.id);
+        
+        const { data: profit } = await supabaseClient
+            .from('daily_profits')
+            .insert([{
+                user_id: userId,
+                subscription_id: subscription.id,
+                amount: profitAmount,
+                profit_date: now.toISOString().split('T')[0],
+                created_at: now.toISOString()
+            }])
+            .select()
+            .single();
+        
+        await supabaseClient
+            .from('transactions')
+            .insert([{
+                user_id: userId,
+                type: 'ربح يومي',
+                amount: profitAmount,
+                description: `مطالبة بأرباح يومية من باقة ${subscription.package_name}`,
+                status: 'completed',
+                subscription_id: subscription.id,
+                created_at: now.toISOString()
+            }]);
+        
+        await addProfitActivity(userId, profitAmount, subscription.package_name);
+        
+        return { 
+            success: true, 
+            data: {
+                amount: profitAmount,
+                nextClaimTime: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString()
+            }
+        };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function getClaimStatus(userId) {
+    try {
+        const { data: subscription, error } = await supabaseClient
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error || !subscription) {
+            return { success: true, data: { canClaim: false, reason: 'no_subscription' } };
+        }
+        
+        const now = new Date();
+        const lastClaim = subscription.last_claim_date ? new Date(subscription.last_claim_date) : null;
+        
+        if (!lastClaim) {
+            return { 
+                success: true, 
+                data: { 
+                    canClaim: true, 
+                    dailyProfit: subscription.daily_profit,
+                    packageName: subscription.package_name
+                }
+            };
+        }
+        
+        const hoursSinceLastClaim = (now - lastClaim) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastClaim >= 24) {
+            return { 
+                success: true, 
+                data: { 
+                    canClaim: true, 
+                    dailyProfit: subscription.daily_profit,
+                    packageName: subscription.package_name
+                }
+            };
+        } else {
+            const hoursLeft = 24 - hoursSinceLastClaim;
+            const nextClaimTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
+            
+            return { 
+                success: true, 
+                data: { 
+                    canClaim: false, 
+                    hoursLeft: Math.ceil(hoursLeft),
+                    nextClaimTime: nextClaimTime.toISOString(),
+                    dailyProfit: subscription.daily_profit,
+                    packageName: subscription.package_name
+                }
+            };
+        }
+    } catch (error) {
         return { success: false, error: error.message };
     }
 }
@@ -1253,32 +643,22 @@ async function rejectPendingPackage(id, reason, adminId) {
 // ========== الإحالة ==========
 async function processReferralRewards(newUserId, referralCode) {
     try {
-        console.log('معالجة مكافآت الإحالة:', { newUserId, referralCode });
-        
-        const { data: referrer, error: referrerError } = await supabaseClient
+        const { data: referrer } = await supabaseClient
             .from('users')
             .select('*')
             .eq('referral_code', referralCode)
             .single();
         
-        if (referrerError || !referrer) {
-            console.log('لم يتم العثور على المحيل');
-            return { success: false };
-        }
+        if (!referrer) return { success: false };
         
         const REFERRER_REWARD = 50;
         const REFEREE_REWARD = 20;
         
-        const { data: newUser, error: userError } = await supabaseClient
+        const { data: newUser } = await supabaseClient
             .from('users')
             .select('*')
             .eq('id', newUserId)
             .single();
-        
-        if (userError || !newUser) {
-            console.log('لم يتم العثور على المستخدم الجديد');
-            return { success: false };
-        }
         
         await supabaseClient
             .from('users')
@@ -1324,33 +704,26 @@ async function processReferralRewards(newUserId, referralCode) {
         
         await supabaseClient.from('transactions').insert(transactions);
         
-        console.log('✅ تم صرف مكافآت الإحالة بنجاح');
         return { success: true };
     } catch (error) {
-        console.error('خطأ في معالجة الإحالة:', error);
         return { success: false };
     }
 }
 
 async function getReferralStats(userId) {
     try {
-        const { data: user, error: userError } = await supabaseClient
+        const { data: user } = await supabaseClient
             .from('users')
             .select('*')
             .eq('id', userId)
             .single();
         
-        if (userError) throw userError;
-        
-        const { data: referredUsers, error: referredError } = await supabaseClient
+        const { data: referredUsers } = await supabaseClient
             .from('users')
             .select('id, name, email, joined_date, has_active_subscription, referral_reward_paid')
             .eq('referred_by', user.referral_code);
         
-        if (referredError) throw referredError;
-        
         const totalEarned = user.referral_earnings || 0;
-        
         const activeReferrals = referredUsers?.filter(u => u.has_active_subscription).length || 0;
         
         return {
@@ -1365,7 +738,6 @@ async function getReferralStats(userId) {
             }
         };
     } catch (error) {
-        console.error('خطأ في جلب إحصائيات الإحالة:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1385,7 +757,6 @@ async function getUserSubscription(userId) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب الاشتراك:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1393,13 +764,11 @@ async function getUserSubscription(userId) {
 // ========== طلبات السحب ==========
 async function createWithdrawal(withdrawalData) {
     try {
-        const { data: user, error: userError } = await supabaseClient
+        const { data: user } = await supabaseClient
             .from('users')
             .select('balance')
             .eq('id', withdrawalData.userId)
             .single();
-        
-        if (userError) throw userError;
         
         const totalAmount = withdrawalData.amount + withdrawalData.fee;
         if (user.balance < totalAmount) {
@@ -1447,7 +816,6 @@ async function createWithdrawal(withdrawalData) {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في إنشاء طلب سحب:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1463,7 +831,6 @@ async function getUserWithdrawals(userId) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب طلبات السحب:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1484,7 +851,6 @@ async function getAllWithdrawals(status = null) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب جميع طلبات السحب:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1529,7 +895,6 @@ async function updateWithdrawalStatus(id, status, adminId, txHash = null) {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في تحديث حالة السحب:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1547,7 +912,6 @@ async function getUserTransactions(userId, limit = 50) {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب المعاملات:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1563,7 +927,142 @@ async function getAllTransactions() {
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب جميع المعاملات:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ========== نظام الهدايا ==========
+async function sendGift(giftData) {
+    try {
+        const giftRecord = {
+            title: giftData.title,
+            message: giftData.message,
+            amount: giftData.amount,
+            type: giftData.type,
+            target_type: giftData.targetType,
+            target_user_id: giftData.targetUserId || null,
+            created_by: giftData.createdBy,
+            status: 'active',
+            created_at: new Date().toISOString()
+        };
+        
+        const { data: gift, error } = await supabaseClient
+            .from('gifts')
+            .insert([giftRecord])
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        if (giftData.targetType === 'all') {
+            const { data: users } = await supabaseClient
+                .from('users')
+                .select('id');
+            
+            for (const user of users) {
+                await supabaseClient
+                    .from('user_gifts')
+                    .insert([{
+                        user_id: user.id,
+                        gift_id: gift.id,
+                        status: 'pending',
+                        created_at: new Date().toISOString()
+                    }]);
+            }
+        } else if (giftData.targetType === 'single' && giftData.targetUserId) {
+            await supabaseClient
+                .from('user_gifts')
+                .insert([{
+                    user_id: giftData.targetUserId,
+                    gift_id: gift.id,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                }]);
+        }
+        
+        return { success: true, data: gift };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function getUserGifts(userId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('user_gifts')
+            .select(`
+                *,
+                gifts:gift_id (*)
+            `)
+            .eq('user_id', userId)
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function claimGift(userGiftId) {
+    try {
+        const { data: userGift } = await supabaseClient
+            .from('user_gifts')
+            .select('*, gifts:gift_id(*)')
+            .eq('id', userGiftId)
+            .single();
+        
+        if (!userGift) throw new Error('الهدية غير موجودة');
+        
+        const amount = userGift.gifts.amount;
+        
+        const { data: user } = await supabaseClient
+            .from('users')
+            .select('balance')
+            .eq('id', userGift.user_id)
+            .single();
+        
+        await supabaseClient
+            .from('users')
+            .update({ balance: (user.balance || 0) + amount })
+            .eq('id', userGift.user_id);
+        
+        await supabaseClient
+            .from('user_gifts')
+            .update({ 
+                status: 'claimed',
+                claimed_at: new Date().toISOString()
+            })
+            .eq('id', userGiftId);
+        
+        await supabaseClient
+            .from('transactions')
+            .insert([{
+                user_id: userGift.user_id,
+                type: 'هدية',
+                amount: amount,
+                description: userGift.gifts.message || 'هدية من الإدارة',
+                status: 'completed',
+                created_at: new Date().toISOString()
+            }]);
+        
+        return { success: true, data: { amount } };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function getAllGifts() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('gifts')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
         return { success: false, error: error.message };
     }
 }
@@ -1576,13 +1075,15 @@ async function getDashboardStats() {
             packagesRes,
             pendingPackagesRes,
             subscriptionsRes,
-            withdrawalsRes
+            withdrawalsRes,
+            giftsRes
         ] = await Promise.all([
             supabaseClient.from('users').select('*', { count: 'exact', head: false }),
             supabaseClient.from('packages').select('*').eq('status', 'active'),
             supabaseClient.from('pending_packages').select('*').eq('status', 'pending'),
             supabaseClient.from('subscriptions').select('*').eq('status', 'active'),
-            supabaseClient.from('withdrawals').select('*')
+            supabaseClient.from('withdrawals').select('*'),
+            supabaseClient.from('gifts').select('*')
         ]);
         
         const users = usersRes.data || [];
@@ -1590,6 +1091,7 @@ async function getDashboardStats() {
         const pendingPackages = pendingPackagesRes.data || [];
         const subscriptions = subscriptionsRes.data || [];
         const withdrawals = withdrawalsRes.data || [];
+        const gifts = giftsRes.data || [];
         
         const totalDeposits = users.reduce((sum, u) => sum + (u.total_earned || 0), 0);
         const totalWithdrawals = withdrawals
@@ -1599,6 +1101,8 @@ async function getDashboardStats() {
         const activeUsers = users.filter(u => u.status === 'active' || !u.status).length;
         const suspendedUsers = users.filter(u => u.status === 'suspended').length;
         const bannedUsers = users.filter(u => u.status === 'banned').length;
+        
+        const pendingGifts = gifts.filter(g => g.status === 'active').length;
         
         return {
             success: true,
@@ -1612,88 +1116,259 @@ async function getDashboardStats() {
                 activeSubscriptions: subscriptions.length,
                 pendingPackages: pendingPackages.length,
                 pendingWithdrawals: withdrawals.filter(w => w.status === 'pending').length,
-                packagesCount: packages.length
+                packagesCount: packages.length,
+                pendingGifts: pendingGifts
             }
         };
     } catch (error) {
-        console.error('خطأ في جلب الإحصائيات:', error);
         return { success: false, error: error.message };
     }
 }
 
-// ========== الأرباح اليومية ==========
-async function processDailyProfits() {
+// ========== نظام الدردشة المباشرة مع دعم الصور ==========
+async function startLiveChat(userId) {
     try {
-        const { data: subscriptions, error } = await supabaseClient
-            .from('subscriptions')
+        const { data: existingChat } = await supabaseClient
+            .from('live_chats')
             .select('*')
-            .eq('status', 'active');
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .maybeSingle();
+        
+        if (existingChat) {
+            return { success: true, data: existingChat, isNew: false };
+        }
+        
+        const { data: newChat, error: createError } = await supabaseClient
+            .from('live_chats')
+            .insert([{
+                user_id: userId,
+                status: 'active',
+                started_at: new Date().toISOString(),
+                last_message_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+        
+        if (createError) throw createError;
+        
+        return { success: true, data: newChat, isNew: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function sendChatMessage(chatId, userId, message, imageUrl = null) {
+    try {
+        if ((!message || !message.trim()) && !imageUrl) {
+            throw new Error('الرسالة أو الصورة مطلوبة');
+        }
+        
+        const { data: newMessage, error: msgError } = await supabaseClient
+            .from('chat_messages')
+            .insert([{
+                chat_id: chatId,
+                user_id: userId,
+                message: message || null,
+                image_url: imageUrl,
+                created_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+        
+        if (msgError) throw msgError;
+        
+        await supabaseClient
+            .from('live_chats')
+            .update({ last_message_at: new Date().toISOString() })
+            .eq('id', chatId);
+        
+        return { success: true, data: newMessage };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function uploadChatImage(file, userId) {
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `chat_${userId}_${Date.now()}.${fileExt}`;
+        const filePath = `chat_images/${fileName}`;
+        
+        const { error: uploadError } = await supabaseClient.storage
+            .from('chat-images')
+            .upload(filePath, file);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: urlData } = supabaseClient.storage
+            .from('chat-images')
+            .getPublicUrl(filePath);
+        
+        return { success: true, url: urlData.publicUrl };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function getChatMessages(chatId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('chat_messages')
+            .select(`
+                *,
+                users:user_id (
+                    id,
+                    name,
+                    is_admin
+                )
+            `)
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true });
         
         if (error) throw error;
         
-        const today = new Date().toISOString().split('T')[0];
-        const profits = [];
+        return { success: true, data };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function markMessagesAsRead(chatId, userId) {
+    try {
+        const { error } = await supabaseClient
+            .from('chat_messages')
+            .update({ 
+                is_read: true,
+                read_at: new Date().toISOString()
+            })
+            .eq('chat_id', chatId)
+            .neq('user_id', userId)
+            .eq('is_read', false);
         
-        for (const sub of subscriptions || []) {
-            const { data: existingProfit } = await supabaseClient
-                .from('daily_profits')
-                .select('id')
-                .eq('user_id', sub.user_id)
-                .eq('subscription_id', sub.id)
-                .gte('created_at', today)
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function deleteChatMessage(messageId, adminId) {
+    try {
+        const { error } = await supabaseClient
+            .from('chat_messages')
+            .update({ 
+                is_deleted: true,
+                deleted_by: adminId,
+                deleted_at: new Date().toISOString()
+            })
+            .eq('id', messageId);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function getActiveChats() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('live_chats')
+            .select(`
+                *,
+                users:user_id (
+                    id,
+                    name,
+                    email,
+                    phone
+                )
+            `)
+            .eq('status', 'active')
+            .order('last_message_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        for (let chat of data || []) {
+            const { data: lastMessage } = await supabaseClient
+                .from('chat_messages')
+                .select('*')
+                .eq('chat_id', chat.id)
+                .eq('is_deleted', false)
+                .order('created_at', { ascending: false })
                 .limit(1)
-                .maybeSingle();
-            
-            if (existingProfit) continue;
-            
-            const profitAmount = sub.daily_profit;
-            
-            const { data: user } = await supabaseClient
-                .from('users')
-                .select('balance, total_earned')
-                .eq('id', sub.user_id)
                 .single();
             
-            await supabaseClient
-                .from('users')
-                .update({ 
-                    balance: (user.balance || 0) + profitAmount,
-                    total_earned: (user.total_earned || 0) + profitAmount
-                })
-                .eq('id', sub.user_id);
+            chat.last_message = lastMessage;
             
-            const { data: profit } = await supabaseClient
-                .from('daily_profits')
-                .insert([{
-                    user_id: sub.user_id,
-                    subscription_id: sub.id,
-                    amount: profitAmount,
-                    profit_date: today,
-                    created_at: new Date().toISOString()
-                }])
-                .select()
-                .single();
+            const { count } = await supabaseClient
+                .from('chat_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('chat_id', chat.id)
+                .eq('is_read', false)
+                .eq('is_deleted', false)
+                .neq('user_id', chat.admin_id);
             
-            await supabaseClient
-                .from('transactions')
-                .insert([{
-                    user_id: sub.user_id,
-                    type: 'ربح يومي',
-                    amount: profitAmount,
-                    description: `أرباح يومية من باقة ${sub.package_name}`,
-                    status: 'completed',
-                    subscription_id: sub.id,
-                    created_at: new Date().toISOString()
-                }]);
-            
-            await addProfitActivity(sub.user_id, profitAmount, sub.package_name);
-            
-            profits.push(profit);
+            chat.unread_count = count || 0;
         }
         
-        return { success: true, data: profits };
+        return { success: true, data };
     } catch (error) {
-        console.error('خطأ في معالجة الأرباح اليومية:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function joinChat(chatId, adminId) {
+    try {
+        const { error } = await supabaseClient
+            .from('live_chats')
+            .update({ 
+                admin_id: adminId,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', chatId);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function closeChat(chatId) {
+    try {
+        const { error } = await supabaseClient
+            .from('live_chats')
+            .update({ 
+                status: 'closed',
+                ended_at: new Date().toISOString()
+            })
+            .eq('id', chatId);
+        
+        if (error) throw error;
+        
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function getUserActiveChat(userId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('live_chats')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .maybeSingle();
+        
+        if (error) throw error;
+        
+        return { success: true, data };
+    } catch (error) {
         return { success: false, error: error.message };
     }
 }
@@ -1720,7 +1395,6 @@ async function addActivity(activityData) {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في إضافة النشاط:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1811,7 +1485,6 @@ async function getUserActivities(userId, limit = 50) {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب النشاطات:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1830,7 +1503,6 @@ async function getUserActivitiesByType(userId, type, limit = 50) {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب النشاطات:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1856,7 +1528,6 @@ async function addGlobalAlert(alertData) {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في إضافة التنبيه:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1876,7 +1547,6 @@ async function getActiveAlerts() {
         
         return { success: true, data };
     } catch (error) {
-        console.error('خطأ في جلب التنبيهات:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1892,7 +1562,6 @@ async function disableAlert(alertId) {
         
         return { success: true };
     } catch (error) {
-        console.error('خطأ في تعطيل التنبيه:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1908,12 +1577,11 @@ async function deleteAlert(alertId) {
         
         return { success: true };
     } catch (error) {
-        console.error('خطأ في حذف التنبيه:', error);
         return { success: false, error: error.message };
     }
 }
 
-// ========== إضافة كود تنظيف عند تحميل الصفحة ==========
+// ========== إضافة كود تنظيف ==========
 (function cleanupOnLoad() {
     try {
         const keysToRemove = [];
@@ -1961,6 +1629,10 @@ window.supabaseHelpers = {
     // الاشتراكات
     getUserSubscription,
     
+    // نظام المطالبة بالأرباح
+    claimDailyProfit,
+    getClaimStatus,
+    
     // السحب
     createWithdrawal,
     getUserWithdrawals,
@@ -1972,36 +1644,26 @@ window.supabaseHelpers = {
     getUserTransactions,
     getAllTransactions,
     
+    // الهدايا
+    sendGift,
+    getUserGifts,
+    claimGift,
+    getAllGifts,
+    
     // الإحصائيات
     getDashboardStats,
     
-    // الأرباح اليومية
-    processDailyProfits,
-    
-    // نظام الدردشة المتطور
+    // نظام الدردشة مع الصور
     startLiveChat,
     sendChatMessage,
-    sendChatImage,
+    uploadChatImage,
     getChatMessages,
-    deleteChatMessage,
-    deleteChat,
-    deleteOldChats,
     markMessagesAsRead,
+    deleteChatMessage,
     getActiveChats,
     joinChat,
     closeChat,
     getUserActiveChat,
-    
-    // نظام رفع الصور
-    uploadImage,
-    deleteImage,
-    
-    // نظام التحقق من الدفع
-    checkPaymentStatus,
-    getAllPendingPackagesWithProof,
-    updatePaymentStatus,
-    getPaymentStats,
-    getUsersWithPayment,
     
     // نظام سجل النشاطات
     addActivity,
@@ -2019,4 +1681,4 @@ window.supabaseHelpers = {
     deleteAlert
 };
 
-console.log('✅ تم تحميل جميع دوال Supabase مع دعم الصور وحذف الدردشة');
+console.log('✅ تم تحميل جميع دوال Supabase مع دعم الصور والهدايا');

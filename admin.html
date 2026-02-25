@@ -328,42 +328,6 @@
             color: var(--gold);
         }
 
-        /* إحصائيات الدفع */
-        .payment-stats {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .payment-stat-card {
-            background: rgba(30, 41, 59, 0.5);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--gold);
-        }
-
-        .payment-stat-value {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 5px;
-        }
-
-        .payment-stat-label {
-            color: var(--text-muted);
-            font-size: 13px;
-        }
-
-        .payment-stat-card.with-proof {
-            border-color: var(--success);
-        }
-
-        .payment-stat-card.without-proof {
-            border-color: var(--warning);
-        }
-
         /* شبكة المحتوى */
         .content-grid {
             display: grid;
@@ -468,18 +432,6 @@
             color: var(--danger);
         }
 
-        .status-with-proof {
-            background: rgba(39, 174, 96, 0.2);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .status-without-proof {
-            background: rgba(243, 156, 18, 0.2);
-            color: var(--warning);
-            border: 1px solid var(--warning);
-        }
-
         .status-online {
             background: rgba(39, 174, 96, 0.2);
             color: var(--success);
@@ -577,7 +529,6 @@
             cursor: pointer;
             transition: all 0.3s;
             border-right: 4px solid var(--success);
-            position: relative;
         }
 
         .chat-item:hover {
@@ -640,32 +591,92 @@
             animation: pulse 2s infinite;
         }
 
-        .chat-delete-btn {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            width: 30px;
-            height: 30px;
-            background: var(--danger);
-            border-radius: 50%;
+        /* ===== نظام الهدايا ===== */
+        .gifts-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-left: 10px;
+        }
+
+        .gift-item {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #ffc107;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            color: white;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .gift-item.info {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .gift-item.success {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .gift-item.warning {
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .gift-item.danger {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .gift-info h3 {
+            color: #ffc107;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .gift-info p {
+            color: var(--text-muted);
             font-size: 14px;
-            cursor: pointer;
-            opacity: 0;
-            transition: all 0.3s;
-            border: 2px solid white;
+            margin-bottom: 8px;
         }
 
-        .chat-item:hover .chat-delete-btn {
-            opacity: 1;
+        .gift-meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
         }
 
-        .chat-delete-btn:hover {
-            transform: scale(1.1);
-            background: #c0392b;
+        .gift-amount {
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffc107;
+        }
+
+        .gift-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .gift-type-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-right: 10px;
+        }
+
+        .type-all {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid #3498db;
+        }
+
+        .type-single {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
         }
 
         /* ===== نظام التنبيهات العامة ===== */
@@ -914,12 +925,12 @@
             border-bottom-left-radius: 5px;
         }
 
-        .message-image {
-            max-width: 250px;
+        .chat-image {
+            max-width: 200px;
             max-height: 200px;
             border-radius: 10px;
+            margin-bottom: 5px;
             cursor: pointer;
-            border: 2px solid var(--gold);
         }
 
         .message-info {
@@ -932,28 +943,6 @@
 
         .chat-message.admin .message-info {
             justify-content: flex-end;
-        }
-
-        .delete-message-btn {
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            width: 24px;
-            height: 24px;
-            background: var(--danger);
-            border: 2px solid white;
-            border-radius: 50%;
-            color: white;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .message-bubble:hover .delete-message-btn {
-            display: flex;
         }
 
         .chat-input-area {
@@ -991,49 +980,6 @@
         .chat-send-btn:hover {
             transform: scale(1.1);
             box-shadow: var(--shadow-gold);
-        }
-
-        /* نافذة عرض الصورة */
-        .image-viewer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.98);
-            z-index: 3000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .image-viewer.active {
-            display: flex;
-        }
-
-        .image-viewer img {
-            max-width: 90%;
-            max-height: 90vh;
-            border: 3px solid var(--gold);
-            border-radius: 20px;
-        }
-
-        .image-viewer-close {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
-            background: var(--danger);
-            border: 2px solid white;
-            border-radius: 50%;
-            color: white;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
         }
 
         /* النماذج */
@@ -1134,10 +1080,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             
-            .payment-stats {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
             .content-grid {
                 grid-template-columns: 1fr;
             }
@@ -1172,10 +1114,6 @@
 
         @media (max-width: 768px) {
             .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .payment-stats {
                 grid-template-columns: 1fr;
             }
             
@@ -1235,11 +1173,6 @@
                     <i class="fas fa-tachometer-alt"></i>
                     <span>لوحة التحكم</span>
                 </a></li>
-                <li><a onclick="showSection('payment_stats')">
-                    <i class="fas fa-credit-card"></i>
-                    <span>إحصائيات الدفع</span>
-                    <span class="badge" id="paymentBadge">0</span>
-                </a></li>
                 <li><a onclick="showSection('users')">
                     <i class="fas fa-users"></i>
                     <span>المستخدمين</span>
@@ -1264,6 +1197,11 @@
                     <span>الدردشة المباشرة</span>
                     <span class="badge" id="chatBadge">0</span>
                 </a></li>
+                <li><a onclick="showSection('gifts')">
+                    <i class="fas fa-gift"></i>
+                    <span>الهدايا</span>
+                    <span class="badge" id="giftsBadge">0</span>
+                </a></li>
                 <li><a onclick="showSection('referrals')">
                     <i class="fas fa-user-friends"></i>
                     <span>الإحالة</span>
@@ -1276,10 +1214,6 @@
                 <li><a onclick="showSection('activity_log')">
                     <i class="fas fa-history"></i>
                     <span>سجل النشاطات</span>
-                </a></li>
-                <li><a onclick="showSection('chat_management')">
-                    <i class="fas fa-trash-alt"></i>
-                    <span>إدارة المحادثات</span>
                 </a></li>
                 <li><a onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>
@@ -1344,30 +1278,6 @@
                         <div class="stat-value" id="activeSubscriptions">0</div>
                     </div>
                 </div>
-
-                <!-- إحصائيات الدفع -->
-                <div class="payment-stats">
-                    <div class="payment-stat-card with-proof" onclick="filterPendingPackages('withProof')">
-                        <div class="payment-stat-value" id="withProofCount">0</div>
-                        <div class="payment-stat-label">مع إثبات دفع</div>
-                    </div>
-                    <div class="payment-stat-card without-proof" onclick="filterPendingPackages('withoutProof')">
-                        <div class="payment-stat-value" id="withoutProofCount">0</div>
-                        <div class="payment-stat-label">بدون إثبات</div>
-                    </div>
-                    <div class="payment-stat-card">
-                        <div class="payment-stat-value" id="pendingCount">0</div>
-                        <div class="payment-stat-label">قيد المراجعة</div>
-                    </div>
-                    <div class="payment-stat-card">
-                        <div class="payment-stat-value" id="approvedCount">0</div>
-                        <div class="payment-stat-label">مقبولة</div>
-                    </div>
-                    <div class="payment-stat-card">
-                        <div class="payment-stat-value" id="rejectedCount">0</div>
-                        <div class="payment-stat-label">مرفوضة</div>
-                    </div>
-                </div>
                 
                 <!-- شبكة المحتوى -->
                 <div class="content-grid">
@@ -1389,13 +1299,12 @@
                                         <th>المستخدم</th>
                                         <th>الباقة</th>
                                         <th>المبلغ</th>
-                                        <th>إثبات</th>
                                         <th>الإجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody id="pendingTable">
                                     <tr>
-                                        <td colspan="5" style="text-align: center; color: var(--text-muted);">
+                                        <td colspan="4" style="text-align: center; color: var(--text-muted);">
                                             لا توجد طلبات معلقة
                                         </td>
                                     </tr>
@@ -1463,61 +1372,8 @@
                         <div class="stat-icon">
                             <i class="fas fa-gift"></i>
                         </div>
-                        <div class="stat-label">أرباح الإحالة</div>
-                        <div class="stat-value" id="referralEarnings">0$</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- قسم إحصائيات الدفع -->
-            <div id="payment_stats-section" class="section">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-credit-card"></i>
-                            إحصائيات الدفع التفصيلية
-                        </h3>
-                        <button class="btn btn-sm btn-primary" onclick="loadPaymentStats()">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="payment-stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 30px;">
-                        <div class="payment-stat-card with-proof">
-                            <div class="payment-stat-value" id="statsWithProof">0</div>
-                            <div class="payment-stat-label">مع إثبات دفع</div>
-                        </div>
-                        <div class="payment-stat-card without-proof">
-                            <div class="payment-stat-value" id="statsWithoutProof">0</div>
-                            <div class="payment-stat-label">بدون إثبات</div>
-                        </div>
-                        <div class="payment-stat-card">
-                            <div class="payment-stat-value" id="statsTotal">0</div>
-                            <div class="payment-stat-label">إجمالي الطلبات</div>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>المستخدم</th>
-                                    <th>الباقة</th>
-                                    <th>المبلغ</th>
-                                    <th>إثبات الدفع</th>
-                                    <th>الحالة</th>
-                                    <th>التاريخ</th>
-                                    <th>الإجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="paymentStatsTable">
-                                <tr>
-                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
-                                        جاري التحميل...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="stat-label">هدايا معلقة</div>
+                        <div class="stat-value" id="pendingGifts">0</div>
                     </div>
                 </div>
             </div>
@@ -1606,19 +1462,6 @@
                             <i class="fas fa-clock"></i>
                             جميع طلبات الاشتراك
                         </h3>
-                        <div class="d-flex gap-2">
-                            <select id="pendingFilter" class="form-control" style="width: 150px;" onchange="filterAllPendingPackages()">
-                                <option value="all">الكل</option>
-                                <option value="withProof">مع إثبات</option>
-                                <option value="withoutProof">بدون إثبات</option>
-                                <option value="pending">معلق</option>
-                                <option value="approved">مقبول</option>
-                                <option value="rejected">مرفوض</option>
-                            </select>
-                            <button class="btn btn-sm btn-primary" onclick="loadAllPendingPackages()">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="admin-table">
@@ -1627,7 +1470,6 @@
                                     <th>المستخدم</th>
                                     <th>الباقة</th>
                                     <th>المبلغ</th>
-                                    <th>إثبات الدفع</th>
                                     <th>التاريخ</th>
                                     <th>كود الإحالة</th>
                                     <th>الحالة</th>
@@ -1636,7 +1478,7 @@
                             </thead>
                             <tbody id="allPendingTable">
                                 <tr>
-                                    <td colspan="8" style="text-align: center; color: var(--text-muted);">
+                                    <td colspan="7" style="text-align: center; color: var(--text-muted);">
                                         جاري التحميل...
                                     </td>
                                 </tr>
@@ -1702,6 +1544,26 @@
                     </div>
                     
                     <div class="chats-list" id="chatsContainer">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم الهدايا -->
+            <div id="gifts-section" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-gift"></i>
+                            إدارة الهدايا
+                        </h3>
+                        <button class="btn btn-success btn-sm" onclick="showAddGiftModal()">
+                            <i class="fas fa-plus"></i>
+                            إرسال هدية جديدة
+                        </button>
+                    </div>
+                    
+                    <div class="gifts-list" id="giftsContainer">
                         <div class="loading-spinner"></div>
                     </div>
                 </div>
@@ -1836,90 +1698,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- قسم إدارة المحادثات -->
-            <div id="chat_management-section" class="section">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-trash-alt"></i>
-                            إدارة المحادثات
-                        </h3>
-                    </div>
-                    
-                    <div class="stats-grid" style="margin-bottom: 25px;">
-                        <div class="stat-card" onclick="loadAllChats()">
-                            <div class="stat-icon">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            <div class="stat-label">إجمالي المحادثات</div>
-                            <div class="stat-value" id="totalChats">0</div>
-                        </div>
-                        <div class="stat-card" onclick="loadActiveChatsOnly()">
-                            <div class="stat-icon">
-                                <i class="fas fa-circle"></i>
-                            </div>
-                            <div class="stat-label">محادثات نشطة</div>
-                            <div class="stat-value" id="activeChatsCount">0</div>
-                        </div>
-                        <div class="stat-card" onclick="loadClosedChats()">
-                            <div class="stat-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="stat-label">محادثات مغلقة</div>
-                            <div class="stat-value" id="closedChatsCount">0</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-image"></i>
-                            </div>
-                            <div class="stat-label">صور مرسلة</div>
-                            <div class="stat-value" id="totalImages">0</div>
-                        </div>
-                    </div>
-
-                    <div class="card" style="margin-top: 20px;">
-                        <h4 style="color: var(--gold); margin-bottom: 15px;">حذف المحادثات القديمة</h4>
-                        <div class="form-group">
-                            <label>حذف المحادثات الأقدم من (أيام)</label>
-                            <div style="display: flex; gap: 10px;">
-                                <input type="number" id="deleteDays" class="form-control" value="30" min="1" max="365" style="flex: 1;">
-                                <button class="btn btn-danger" onclick="deleteOldChats()">
-                                    <i class="fas fa-trash"></i>
-                                    حذف
-                                </button>
-                            </div>
-                            <small style="color: var(--text-muted);">سيتم حذف جميع المحادثات المغلقة الأقدم من العدد المحدد من الأيام</small>
-                        </div>
-                    </div>
-
-                    <div class="card" style="margin-top: 20px;">
-                        <h4 style="color: var(--gold); margin-bottom: 15px;">جميع المحادثات</h4>
-                        <div class="table-responsive">
-                            <table class="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>المستخدم</th>
-                                        <th>الحالة</th>
-                                        <th>عدد الرسائل</th>
-                                        <th>عدد الصور</th>
-                                        <th>تاريخ البدء</th>
-                                        <th>آخر نشاط</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="allChatsTable">
-                                    <tr>
-                                        <td colspan="7" style="text-align: center; color: var(--text-muted);">
-                                            جاري التحميل...
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
     
@@ -1979,6 +1757,51 @@
         </div>
     </div>
     
+    <!-- نافذة إضافة هدية -->
+    <div class="modal" id="addGiftModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إرسال هدية جديدة</h3>
+                <button class="modal-close" onclick="closeAddGiftModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>نوع الهدية</label>
+                <select id="giftType" class="form-control" onchange="toggleGiftTarget()">
+                    <option value="all">👥 لجميع المستخدمين</option>
+                    <option value="single">👤 لمستخدم محدد</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="userSelectGroup" style="display: none;">
+                <label>اختر المستخدم</label>
+                <select id="giftUser" class="form-control">
+                    <option value="">جاري تحميل المستخدمين...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>عنوان الهدية</label>
+                <input type="text" id="giftTitle" class="form-control" placeholder="مثال: هدية ترحيبية">
+            </div>
+            
+            <div class="form-group">
+                <label>رسالة الهدية</label>
+                <textarea id="giftMessage" class="form-control" rows="3" placeholder="شكراً لانضمامك إلينا..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>قيمة الهدية ($)</label>
+                <input type="number" id="giftAmount" class="form-control" min="1" step="1" placeholder="100">
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" style="flex: 1;" onclick="closeAddGiftModal()">إلغاء</button>
+                <button class="btn btn-success" style="flex: 2;" onclick="sendGift()">إرسال الهدية</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- نافذة معالجة طلب اشتراك -->
     <div class="modal" id="processPendingModal">
         <div class="modal-content">
@@ -1988,18 +1811,6 @@
             </div>
             
             <div id="pendingDetails" style="margin-bottom: 20px;"></div>
-            
-            <div class="form-group">
-                <label>حالة إثبات الدفع</label>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button class="btn btn-sm" style="flex: 1; background: var(--success);" onclick="updatePaymentProof(true)">
-                        <i class="fas fa-check"></i> مع إثبات
-                    </button>
-                    <button class="btn btn-sm" style="flex: 1; background: var(--warning);" onclick="updatePaymentProof(false)">
-                        <i class="fas fa-times"></i> بدون إثبات
-                    </button>
-                </div>
-            </div>
             
             <div class="form-group">
                 <label>ملاحظات (اختياري)</label>
@@ -2125,6 +1936,7 @@
             <div class="form-group">
                 <label>تاريخ الانتهاء (اختياري)</label>
                 <input type="datetime-local" id="alertExpires" class="form-control">
+                <small style="color: var(--text-muted);">اترك فارغاً إذا كان التنبيه دائماً</small>
             </div>
             
             <div class="modal-footer">
@@ -2132,14 +1944,6 @@
                 <button class="btn btn-success" style="flex: 2;" onclick="addAlert()">إضافة التنبيه</button>
             </div>
         </div>
-    </div>
-
-    <!-- نافذة عرض الصورة -->
-    <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
-        <div class="image-viewer-close" onclick="closeImageViewer(event)">
-            <i class="fas fa-times"></i>
-        </div>
-        <img id="viewerImage" src="" alt="صورة">
     </div>
     
     <!-- الإشعارات -->
@@ -2153,8 +1957,6 @@
         let currentWithdrawalId = null;
         let currentChatId = null;
         let chatInterval = null;
-        let allPendingPackages = [];
-        let paymentStats = null;
         
         // ========== التحقق من صلاحية المسؤول ==========
         async function checkAdminAccess() {
@@ -2187,23 +1989,22 @@
             await loadAllData();
             updateDateTime();
             setInterval(updateDateTime, 1000);
+            
             setInterval(loadActiveChats, 10000);
         });
         
         // ========== تحميل جميع البيانات ==========
         async function loadAllData() {
-            console.log('جاري تحميل جميع البيانات...');
             await loadDashboardStats();
-            await loadPaymentStats();
-            await loadAllPendingPackages();
             await loadUsers();
             await loadPackages();
+            await loadPendingPackages();
             await loadWithdrawals();
             await loadReferralStats();
             await loadActiveChats();
+            await loadGifts();
             await loadAlerts();
             await loadAllActivities();
-            await loadChatStats();
         }
         
         // ========== تحميل إحصائيات لوحة التحكم ==========
@@ -2220,98 +2021,14 @@
                     document.getElementById('activeUsers').textContent = stats.activeUsers || 0;
                     document.getElementById('suspendedUsers').textContent = (stats.suspendedUsers + stats.bannedUsers) || 0;
                     document.getElementById('packagesCount').textContent = stats.packagesCount || 0;
+                    document.getElementById('pendingGifts').textContent = stats.pendingGifts || 0;
                     
                     document.getElementById('usersBadge').textContent = stats.totalUsers || 0;
                     document.getElementById('pendingBadge').textContent = stats.pendingPackages || 0;
                     document.getElementById('withdrawalsBadge').textContent = stats.pendingWithdrawals || 0;
+                    document.getElementById('giftsBadge').textContent = stats.pendingGifts || 0;
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل الإحصائيات:', error);
-            }
-        }
-
-        // ========== تحميل إحصائيات الدفع ==========
-        async function loadPaymentStats() {
-            try {
-                const result = await window.supabaseHelpers.getPaymentStats();
-                if (result.success && result.data) {
-                    paymentStats = result.data;
-                    
-                    document.getElementById('withProofCount').textContent = paymentStats.withProof || 0;
-                    document.getElementById('withoutProofCount').textContent = paymentStats.withoutProof || 0;
-                    document.getElementById('pendingCount').textContent = paymentStats.pending || 0;
-                    document.getElementById('approvedCount').textContent = paymentStats.approved || 0;
-                    document.getElementById('rejectedCount').textContent = paymentStats.rejected || 0;
-                    
-                    document.getElementById('statsWithProof').textContent = paymentStats.withProof || 0;
-                    document.getElementById('statsWithoutProof').textContent = paymentStats.withoutProof || 0;
-                    document.getElementById('statsTotal').textContent = paymentStats.total || 0;
-                    
-                    document.getElementById('paymentBadge').textContent = paymentStats.pending || 0;
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل إحصائيات الدفع:', error);
-            }
-        }
-
-        // ========== تحميل جميع طلبات الاشتراك مع التصنيف ==========
-        async function loadAllPendingPackages() {
-            try {
-                const result = await window.supabaseHelpers.getAllPendingPackagesWithProof();
-                if (result.success && result.data) {
-                    allPendingPackages = result.data.all || [];
-                    displayPaymentStatsTable(result.data.all || []);
-                    displayAllPendingPackages(result.data.all || []);
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل الطلبات:', error);
-            }
-        }
-
-        // ========== عرض جدول إحصائيات الدفع ==========
-        function displayPaymentStatsTable(packages) {
-            const tbody = document.getElementById('paymentStatsTable');
-            
-            if (!packages || packages.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد طلبات</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            packages.slice(0, 10).forEach(p => {
-                const proofStatus = p.payment_proof ? 
-                    '<span class="status-badge status-with-proof"><i class="fas fa-check-circle"></i> مع إثبات</span>' : 
-                    '<span class="status-badge status-without-proof"><i class="fas fa-clock"></i> بدون إثبات</span>';
-                
-                let statusClass = 'status-pending';
-                let statusText = 'معلق';
-                
-                if (p.status === 'approved') {
-                    statusClass = 'status-approved';
-                    statusText = 'مقبول';
-                } else if (p.status === 'rejected') {
-                    statusClass = 'status-rejected';
-                    statusText = 'مرفوض';
-                }
-                
-                html += `
-                    <tr>
-                        <td>${p.user_name || p.users?.name || '-'}</td>
-                        <td>${p.package_name}</td>
-                        <td>${p.amount}$</td>
-                        <td>${proofStatus}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td>${new Date(p.created_at).toLocaleDateString('ar-SA')}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" onclick="openProcessModal(${p.id})">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = html;
+            } catch (error) {}
         }
         
         // ========== تحميل المستخدمين ==========
@@ -2321,9 +2038,7 @@
                 if (result.success && result.data) {
                     displayUsers(result.data);
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل المستخدمين:', error);
-            }
+            } catch (error) {}
         }
         
         function displayUsers(users) {
@@ -2373,9 +2088,7 @@
                 if (result.success && result.data) {
                     displayPackages(result.data);
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل الباقات:', error);
-            }
+            } catch (error) {}
         }
         
         function displayPackages(packages) {
@@ -2423,16 +2136,15 @@
             tbody.innerHTML = html;
         }
         
-        // ========== تحميل طلبات الاشتراك المعلقة ==========
+        // ========== تحميل طلبات الاشتراك ==========
         async function loadPendingPackages() {
             try {
                 const result = await window.supabaseHelpers.getPendingPackages();
                 if (result.success && result.data) {
                     displayPendingPackages(result.data);
+                    displayAllPendingPackages(result.data);
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل الطلبات:', error);
-            }
+            } catch (error) {}
         }
         
         function displayPendingPackages(pending) {
@@ -2440,22 +2152,17 @@
             const pendingOnly = pending.filter(p => p.status === 'pending');
             
             if (pendingOnly.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">لا توجد طلبات معلقة</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">لا توجد طلبات معلقة</td></tr>';
                 return;
             }
             
             let html = '';
             pendingOnly.slice(0, 5).forEach(p => {
-                const proofStatus = p.payment_proof ? 
-                    '<span class="status-badge status-with-proof">✅ مع إثبات</span>' : 
-                    '<span class="status-badge status-without-proof">⏳ بدون إثبات</span>';
-                
                 html += `
                     <tr>
                         <td>${p.user_name}</td>
                         <td>${p.package_name}</td>
                         <td>${p.amount}$</td>
-                        <td>${proofStatus}</td>
                         <td>
                             <button class="btn btn-sm btn-success" onclick="openProcessModal(${p.id})">
                                 <i class="fas fa-check"></i>
@@ -2472,16 +2179,12 @@
             const tbody = document.getElementById('allPendingTable');
             
             if (pending.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">لا توجد طلبات</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد طلبات</td></tr>';
                 return;
             }
             
             let html = '';
             pending.forEach(p => {
-                const proofStatus = p.payment_proof ? 
-                    '<span class="status-badge status-with-proof">✅ مع إثبات</span>' : 
-                    '<span class="status-badge status-without-proof">⏳ بدون إثبات</span>';
-                
                 let statusClass = 'status-pending';
                 let statusText = 'معلق';
                 
@@ -2498,7 +2201,6 @@
                         <td>${p.user_name}</td>
                         <td>${p.package_name}</td>
                         <td>${p.amount}$</td>
-                        <td>${proofStatus}</td>
                         <td>${new Date(p.created_at).toLocaleDateString('ar-SA')}</td>
                         <td>${p.referred_by || '-'}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -2515,35 +2217,6 @@
             
             tbody.innerHTML = html;
         }
-
-        // ========== فلترة طلبات الاشتراك ==========
-        function filterAllPendingPackages() {
-            const filter = document.getElementById('pendingFilter').value;
-            
-            if (!allPendingPackages || allPendingPackages.length === 0) return;
-            
-            let filtered = allPendingPackages;
-            
-            if (filter === 'withProof') {
-                filtered = allPendingPackages.filter(p => p.payment_proof);
-            } else if (filter === 'withoutProof') {
-                filtered = allPendingPackages.filter(p => !p.payment_proof);
-            } else if (filter === 'pending') {
-                filtered = allPendingPackages.filter(p => p.status === 'pending');
-            } else if (filter === 'approved') {
-                filtered = allPendingPackages.filter(p => p.status === 'approved');
-            } else if (filter === 'rejected') {
-                filtered = allPendingPackages.filter(p => p.status === 'rejected');
-            }
-            
-            displayAllPendingPackages(filtered);
-        }
-
-        function filterPendingPackages(type) {
-            showSection('pending');
-            document.getElementById('pendingFilter').value = type === 'withProof' ? 'withProof' : 'withoutProof';
-            filterAllPendingPackages();
-        }
         
         // ========== تحميل طلبات السحب ==========
         async function loadWithdrawals() {
@@ -2553,9 +2226,7 @@
                     displayWithdrawals(result.data);
                     displayAllWithdrawals(result.data);
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل طلبات السحب:', error);
-            }
+            } catch (error) {}
         }
         
         function displayWithdrawals(withdrawals) {
@@ -2629,6 +2300,183 @@
             tbody.innerHTML = html;
         }
         
+        // ========== تحميل الهدايا ==========
+        async function loadGifts() {
+            try {
+                const result = await window.supabaseHelpers.getAllGifts();
+                
+                const container = document.getElementById('giftsContainer');
+                const badge = document.getElementById('giftsBadge');
+                
+                if (!result.success || !result.data || result.data.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-alerts">
+                            <i class="fas fa-gift"></i>
+                            <h3>لا توجد هدايا</h3>
+                            <p>قم بإرسال هدية جديدة للمستخدمين</p>
+                        </div>
+                    `;
+                    if (badge) {
+                        badge.style.display = 'none';
+                    }
+                    return;
+                }
+                
+                displayGifts(result.data);
+                
+                const activeGifts = result.data.filter(g => g.status === 'active').length;
+                if (badge) {
+                    badge.textContent = activeGifts;
+                    badge.style.display = activeGifts > 0 ? 'inline' : 'none';
+                }
+            } catch (error) {}
+        }
+        
+        function displayGifts(gifts) {
+            const container = document.getElementById('giftsContainer');
+            
+            let html = '';
+            gifts.forEach(gift => {
+                let typeClass = '';
+                let typeText = '';
+                
+                switch(gift.type) {
+                    case 'info':
+                        typeClass = 'info';
+                        break;
+                    case 'success':
+                        typeClass = 'success';
+                        break;
+                    case 'warning':
+                        typeClass = 'warning';
+                        break;
+                    case 'danger':
+                        typeClass = 'danger';
+                        break;
+                }
+                
+                const date = new Date(gift.created_at).toLocaleDateString('ar-SA');
+                const targetType = gift.target_type === 'all' ? 'جميع المستخدمين' : 'مستخدم محدد';
+                
+                html += `
+                    <div class="gift-item ${typeClass}">
+                        <div class="gift-info">
+                            <h3>${gift.title} 
+                                <span class="gift-type-badge ${gift.target_type === 'all' ? 'type-all' : 'type-single'}">
+                                    ${targetType}
+                                </span>
+                            </h3>
+                            <p>${gift.message}</p>
+                            <div class="gift-meta">
+                                <i class="far fa-calendar"></i> ${date}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="gift-amount">${gift.amount}$</div>
+                            <div class="gift-actions">
+                                <button class="btn btn-sm btn-danger" onclick="deleteGift(${gift.id})">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function showAddGiftModal() {
+            loadUsersForGift();
+            document.getElementById('addGiftModal').classList.add('active');
+        }
+        
+        function closeAddGiftModal() {
+            document.getElementById('addGiftModal').classList.remove('active');
+            document.getElementById('giftTitle').value = '';
+            document.getElementById('giftMessage').value = '';
+            document.getElementById('giftAmount').value = '';
+            document.getElementById('giftType').value = 'all';
+            document.getElementById('userSelectGroup').style.display = 'none';
+        }
+        
+        function toggleGiftTarget() {
+            const type = document.getElementById('giftType').value;
+            document.getElementById('userSelectGroup').style.display = type === 'single' ? 'block' : 'none';
+        }
+        
+        async function loadUsersForGift() {
+            try {
+                const result = await window.supabaseHelpers.getAllUsers();
+                if (result.success && result.data) {
+                    const select = document.getElementById('giftUser');
+                    let options = '<option value="">اختر مستخدم...</option>';
+                    
+                    result.data.forEach(user => {
+                        options += `<option value="${user.id}">${user.name} (${user.email})</option>`;
+                    });
+                    
+                    select.innerHTML = options;
+                }
+            } catch (error) {}
+        }
+        
+        async function sendGift() {
+            const type = document.getElementById('giftType').value;
+            const title = document.getElementById('giftTitle').value.trim();
+            const message = document.getElementById('giftMessage').value.trim();
+            const amount = parseFloat(document.getElementById('giftAmount').value);
+            const targetUserId = type === 'single' ? document.getElementById('giftUser').value : null;
+            
+            if (!title || !message || !amount) {
+                showNotification('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+            
+            if (type === 'single' && !targetUserId) {
+                showNotification('يرجى اختيار مستخدم', 'error');
+                return;
+            }
+            
+            const result = await window.supabaseHelpers.sendGift({
+                title,
+                message,
+                amount,
+                type: 'info',
+                targetType: type,
+                targetUserId,
+                createdBy: currentAdmin.id
+            });
+            
+            if (result.success) {
+                closeAddGiftModal();
+                showNotification('✅ تم إرسال الهدية بنجاح');
+                await loadGifts();
+                await loadDashboardStats();
+            } else {
+                showNotification('❌ ' + result.error, 'error');
+            }
+        }
+        
+        async function deleteGift(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه الهدية؟')) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('gifts')
+                    .update({ status: 'deleted' })
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                showNotification('✅ تم حذف الهدية');
+                await loadGifts();
+                await loadDashboardStats();
+            } catch (error) {
+                showNotification('❌ ' + error.message, 'error');
+            }
+        }
+        
         // ========== تحميل إحصائيات الإحالة ==========
         async function loadReferralStats() {
             try {
@@ -2660,9 +2508,7 @@
                 document.getElementById('referralRate').textContent = '0%';
                 
                 displayMarketers(marketers.sort((a, b) => b.count - a.count));
-            } catch (error) {
-                console.error('خطأ في تحميل إحصائيات الإحالة:', error);
-            }
+            } catch (error) {}
         }
         
         function displayMarketers(marketers) {
@@ -2688,80 +2534,6 @@
             
             tbody.innerHTML = html;
         }
-
-        // ========== تحميل إحصائيات المحادثات ==========
-        async function loadChatStats() {
-            try {
-                const { data: chats, error } = await supabaseClient
-                    .from('live_chats')
-                    .select(`
-                        *,
-                        chat_messages(*)
-                    `);
-                
-                if (error) throw error;
-                
-                const activeChats = chats?.filter(c => c.status === 'active') || [];
-                const closedChats = chats?.filter(c => c.status === 'closed') || [];
-                
-                let totalImages = 0;
-                chats?.forEach(chat => {
-                    if (chat.chat_messages) {
-                        totalImages += chat.chat_messages.filter(m => m.message_type === 'image').length;
-                    }
-                });
-                
-                document.getElementById('totalChats').textContent = chats?.length || 0;
-                document.getElementById('activeChatsCount').textContent = activeChats.length;
-                document.getElementById('closedChatsCount').textContent = closedChats.length;
-                document.getElementById('totalImages').textContent = totalImages;
-                
-                displayAllChats(chats || []);
-            } catch (error) {
-                console.error('خطأ في تحميل إحصائيات المحادثات:', error);
-            }
-        }
-
-        function displayAllChats(chats) {
-            const tbody = document.getElementById('allChatsTable');
-            
-            if (!chats || chats.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا توجد محادثات</td></tr>';
-                return;
-            }
-            
-            let html = '';
-            chats.slice(0, 20).forEach(chat => {
-                const messageCount = chat.chat_messages?.length || 0;
-                const imageCount = chat.chat_messages?.filter(m => m.message_type === 'image').length || 0;
-                
-                let statusClass = 'status-active';
-                let statusText = 'نشطة';
-                
-                if (chat.status === 'closed') {
-                    statusClass = 'status-pending';
-                    statusText = 'مغلقة';
-                }
-                
-                html += `
-                    <tr>
-                        <td>${chat.users?.name || 'مستخدم'}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td>${messageCount}</td>
-                        <td>${imageCount}</td>
-                        <td>${new Date(chat.created_at).toLocaleDateString('ar-SA')}</td>
-                        <td>${new Date(chat.last_message_at).toLocaleDateString('ar-SA')}</td>
-                        <td>
-                            <button class="btn btn-sm btn-danger" onclick="deleteSingleChat(${chat.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = html;
-        }
         
         // ========== إدارة الدردشة المباشرة ==========
         async function loadActiveChats() {
@@ -2778,20 +2550,18 @@
                         document.title = `(${unreadCount}) لوحة الإدارة - Elite Capital`;
                     }
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل المحادثات:', error);
-            }
+            } catch (error) {}
         }
         
         function displayChats(chats) {
             const container = document.getElementById('chatsContainer');
+            const filter = document.getElementById('chatFilter')?.value || 'all';
             
             if (!chats || chats.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-muted);">لا توجد محادثات نشطة</div>';
                 return;
             }
             
-            const filter = document.getElementById('chatFilter')?.value || 'all';
             let filteredChats = chats;
             
             if (filter === 'unread') {
@@ -2813,9 +2583,6 @@
                 
                 html += `
                     <div class="chat-item ${isUnread ? 'unread' : ''}" onclick="openChat(${chat.id}, '${chat.users?.name || 'مستخدم'}')">
-                        <div class="chat-delete-btn" onclick="deleteSingleChat(event, ${chat.id})">
-                            <i class="fas fa-trash"></i>
-                        </div>
                         <div class="chat-avatar">
                             ${(chat.users?.name || 'م').charAt(0).toUpperCase()}
                         </div>
@@ -2867,9 +2634,7 @@
                     await window.supabaseHelpers.markMessagesAsRead(currentChatId, currentAdmin.id);
                     await loadActiveChats();
                 }
-            } catch (error) {
-                console.error('خطأ في تحميل الرسائل:', error);
-            }
+            } catch (error) {}
         }
         
         function displayChatMessages(messages) {
@@ -2879,10 +2644,11 @@
             let lastDate = null;
             
             messages.forEach(msg => {
+                if (msg.is_deleted) return;
+                
                 const isAdmin = msg.users?.is_admin;
                 const msgDate = new Date(msg.created_at);
                 const dateStr = msgDate.toLocaleDateString('ar-SA');
-                const timeStr = msgDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                 
                 if (lastDate !== dateStr) {
                     html += `
@@ -2895,43 +2661,30 @@
                     lastDate = dateStr;
                 }
                 
+                const timeStr = msgDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                 const senderName = isAdmin ? 'أنت' : msg.users?.name || 'مستخدم';
                 
-                if (msg.message_type === 'image') {
-                    html += `
-                        <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
-                            <div class="message-bubble" style="padding: 5px; background: transparent; border: none;">
-                                <img src="${msg.image_url}" class="message-image" onclick="openImageViewer('${msg.image_url}')">
-                                <div class="delete-message-btn" onclick="deleteChatMessage(${msg.id}, event)">
-                                    <i class="fas fa-trash"></i>
-                                </div>
-                            </div>
-                            <div class="message-info">
-                                <span>${senderName}</span>
-                                <span>•</span>
-                                <span>${timeStr}</span>
-                                ${msg.is_read ? '<span>✓✓</span>' : ''}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                        <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
-                            <div class="message-bubble">
-                                ${msg.message}
-                                <div class="delete-message-btn" onclick="deleteChatMessage(${msg.id}, event)">
-                                    <i class="fas fa-trash"></i>
-                                </div>
-                            </div>
-                            <div class="message-info">
-                                <span>${senderName}</span>
-                                <span>•</span>
-                                <span>${timeStr}</span>
-                                ${msg.is_read ? '<span>✓✓</span>' : ''}
-                            </div>
-                        </div>
-                    `;
+                let messageContent = '';
+                if (msg.image_url) {
+                    messageContent += `<img src="${msg.image_url}" class="chat-image" onclick="window.open('${msg.image_url}', '_blank')"><br>`;
                 }
+                if (msg.message) {
+                    messageContent += msg.message;
+                }
+                
+                html += `
+                    <div class="chat-message ${isAdmin ? 'admin' : 'user'}">
+                        <div class="message-bubble">
+                            ${messageContent}
+                        </div>
+                        <div class="message-info">
+                            <span>${senderName}</span>
+                            <span>•</span>
+                            <span>${timeStr}</span>
+                            ${msg.is_read ? '<span>✓✓</span>' : ''}
+                        </div>
+                    </div>
+                `;
             });
             
             container.innerHTML = html;
@@ -2957,95 +2710,6 @@
             } else {
                 showNotification('❌ ' + result.error, 'error');
             }
-        }
-
-        async function deleteChatMessage(messageId, event) {
-            if (event) {
-                event.stopPropagation();
-            }
-            
-            if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
-            
-            const result = await window.supabaseHelpers.deleteChatMessage(
-                messageId,
-                currentAdmin.id,
-                true
-            );
-            
-            if (result.success) {
-                showNotification('✅ تم حذف الرسالة');
-                await loadChatMessages();
-            } else {
-                showNotification('❌ ' + result.error, 'error');
-            }
-        }
-
-        async function deleteSingleChat(event, chatId) {
-            if (event) {
-                event.stopPropagation();
-            }
-            
-            if (!confirm('هل أنت متأكد من حذف هذه المحادثة؟\nسيتم حذف جميع الرسائل والصور المرتبطة بها')) return;
-            
-            const result = await window.supabaseHelpers.deleteChat(
-                chatId,
-                currentAdmin.id,
-                true
-            );
-            
-            if (result.success) {
-                showNotification('✅ تم حذف المحادثة');
-                await loadActiveChats();
-                await loadChatStats();
-            } else {
-                showNotification('❌ ' + result.error, 'error');
-            }
-        }
-
-        async function deleteOldChats() {
-            const days = document.getElementById('deleteDays').value;
-            
-            if (!confirm(`هل أنت متأكد من حذف جميع المحادثات المغلقة الأقدم من ${days} يوم؟`)) return;
-            
-            const result = await window.supabaseHelpers.deleteOldChats(
-                parseInt(days),
-                currentAdmin.id,
-                true
-            );
-            
-            if (result.success) {
-                showNotification(`✅ ${result.data.message}`);
-                await loadChatStats();
-            } else {
-                showNotification('❌ ' + result.error, 'error');
-            }
-        }
-
-        function loadAllChats() {
-            showSection('chat_management');
-            loadChatStats();
-        }
-
-        function loadActiveChatsOnly() {
-            showSection('chat_management');
-            // يمكن إضافة فلترة هنا
-        }
-
-        function loadClosedChats() {
-            showSection('chat_management');
-            // يمكن إضافة فلترة هنا
-        }
-
-        function openImageViewer(imageUrl) {
-            document.getElementById('viewerImage').src = imageUrl;
-            document.getElementById('imageViewer').classList.add('active');
-        }
-
-        function closeImageViewer(event) {
-            if (event) {
-                event.stopPropagation();
-            }
-            document.getElementById('imageViewer').classList.remove('active');
         }
         
         function handleChatKeyPress(event) {
@@ -3135,42 +2799,13 @@
         // ========== معالجة طلبات الاشتراك ==========
         function openProcessModal(id) {
             currentPendingId = id;
-            const pending = allPendingPackages.find(p => p.id === id);
-            
-            if (pending) {
-                const proofStatus = pending.payment_proof ? '✅ مع إثبات دفع' : '⏳ بدون إثبات دفع';
-                document.getElementById('pendingDetails').innerHTML = `
-                    <p><strong>المستخدم:</strong> ${pending.user_name}</p>
-                    <p><strong>الباقة:</strong> ${pending.package_name}</p>
-                    <p><strong>المبلغ:</strong> ${pending.amount}$</p>
-                    <p><strong>حالة الدفع:</strong> ${proofStatus}</p>
-                `;
-            }
-            
+            document.getElementById('pendingDetails').innerHTML = `<p>جارٍ تحميل التفاصيل...</p>`;
             document.getElementById('processPendingModal').classList.add('active');
         }
         
         function closeProcessModal() {
             document.getElementById('processPendingModal').classList.remove('active');
             currentPendingId = null;
-        }
-
-        async function updatePaymentProof(hasProof) {
-            if (!currentPendingId) return;
-            
-            const result = await window.supabaseHelpers.updatePaymentStatus(
-                currentPendingId,
-                hasProof,
-                currentAdmin.id
-            );
-            
-            if (result.success) {
-                showNotification('✅ تم تحديث حالة إثبات الدفع');
-                await loadAllPendingPackages();
-                await loadPaymentStats();
-            } else {
-                showNotification('❌ ' + result.error, 'error');
-            }
         }
         
         async function approvePending() {
@@ -3307,7 +2942,7 @@
                 const badge = document.getElementById('alertsBadge');
                 
                 if (error) {
-                    console.error('خطأ في جلب التنبيهات:', error);
+                    container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--danger);">خطأ: ${error.message}</div>`;
                     return;
                 }
                 
@@ -3319,18 +2954,19 @@
                             <p>قم بإضافة تنبيه جديد ليظهر للمستخدمين</p>
                         </div>
                     `;
-                    if (badge) badge.style.display = 'none';
+                    if (badge) {
+                        badge.style.display = 'none';
+                    }
                     return;
                 }
                 
                 displayAlerts(data);
+                
                 if (badge) {
                     badge.textContent = data.length;
                     badge.style.display = data.length > 0 ? 'inline' : 'none';
                 }
-            } catch (error) {
-                console.error('استثناء في تحميل التنبيهات:', error);
-            }
+            } catch (error) {}
         }
         
         function displayAlerts(alerts) {
@@ -3439,8 +3075,13 @@
                 closeAddAlertModal();
                 showNotification('✅ تم إضافة التنبيه بنجاح');
                 await loadAlerts();
+                
+                document.getElementById('alertTitle').value = '';
+                document.getElementById('alertMessage').value = '';
+                document.getElementById('alertType').value = 'info';
+                document.getElementById('alertExpires').value = '';
+                
             } catch (error) {
-                console.error('خطأ في إضافة التنبيه:', error);
                 showNotification('❌ ' + error.message, 'error');
             }
         }
@@ -3458,8 +3099,8 @@
                 
                 showNotification('✅ تم حذف التنبيه');
                 await loadAlerts();
+                
             } catch (error) {
-                console.error('خطأ في حذف التنبيه:', error);
                 showNotification('❌ ' + error.message, 'error');
             }
         }
@@ -3486,9 +3127,8 @@
                 if (error) throw error;
                 
                 displayAllActivities(data || []);
-            } catch (error) {
-                console.error('خطأ في تحميل النشاطات:', error);
-            }
+                
+            } catch (error) {}
         }
         
         function displayAllActivities(activities) {
@@ -3585,22 +3225,23 @@
             
             const titles = {
                 'dashboard': 'لوحة التحكم',
-                'payment_stats': 'إحصائيات الدفع',
                 'users': 'إدارة المستخدمين',
                 'packages': 'إدارة الباقات',
                 'pending': 'طلبات الاشتراك',
                 'withdrawals': 'طلبات السحب',
                 'livechat': 'الدردشة المباشرة',
+                'gifts': 'إدارة الهدايا',
                 'referrals': 'نظام الإحالة',
                 'alerts': 'إدارة التنبيهات',
-                'activity_log': 'سجل النشاطات',
-                'chat_management': 'إدارة المحادثات'
+                'activity_log': 'سجل النشاطات'
             };
             
             document.getElementById('pageTitle').textContent = titles[sectionId] || 'لوحة التحكم';
             
             if (sectionId === 'livechat') {
                 loadActiveChats();
+            } else if (sectionId === 'gifts') {
+                loadGifts();
             } else if (sectionId === 'alerts') {
                 loadAlerts();
             } else if (sectionId === 'activity_log') {
@@ -3610,16 +3251,11 @@
             } else if (sectionId === 'packages') {
                 loadPackages();
             } else if (sectionId === 'pending') {
-                loadAllPendingPackages();
+                loadPendingPackages();
             } else if (sectionId === 'withdrawals') {
                 loadWithdrawals();
             } else if (sectionId === 'referrals') {
                 loadReferralStats();
-            } else if (sectionId === 'payment_stats') {
-                loadPaymentStats();
-                loadAllPendingPackages();
-            } else if (sectionId === 'chat_management') {
-                loadChatStats();
             }
         }
         
@@ -3653,14 +3289,12 @@
             }
         }
         
-        // تنظيف عند مغادرة الصفحة
         window.addEventListener('beforeunload', function() {
             if (chatInterval) {
                 clearInterval(chatInterval);
             }
         });
 
-        // إغلاق القائمة عند النقر خارجها
         document.addEventListener('click', function(e) {
             const dropdown = document.getElementById('userDropdown');
             const avatar = document.getElementById('userAvatar');

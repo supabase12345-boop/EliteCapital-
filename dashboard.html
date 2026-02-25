@@ -449,25 +449,65 @@
             color: var(--gold);
         }
 
-        .profit-timer {
+        /* ===== زر المطالبة بالأرباح اليومية ===== */
+        .claim-section {
             background: rgba(39, 174, 96, 0.1);
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--success);
-            margin-top: 20px;
+            border-radius: 30px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid var(--success);
+            text-align: center;
         }
 
-        .profit-amount {
-            font-size: 32px;
+        .claim-amount {
+            font-size: 48px;
             font-weight: 900;
             color: var(--success);
+            margin-bottom: 10px;
         }
 
-        .profit-time {
+        .claim-label {
             color: var(--text-muted);
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .claim-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 60px;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+        }
+
+        .claim-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(39, 174, 96, 0.4);
+        }
+
+        .claim-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .claim-timer {
+            font-size: 18px;
+            color: var(--warning);
+            margin-top: 15px;
+        }
+
+        .claim-timer i {
+            margin-left: 5px;
         }
 
         /* حالة عدم وجود اشتراك */
@@ -496,6 +536,102 @@
         .no-subscription p {
             color: var(--text-muted);
             margin-bottom: 30px;
+        }
+
+        /* ===== بطاقة الهدايا ===== */
+        .gifts-section {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #ffc107;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .gifts-section::before {
+            content: '🎁';
+            position: absolute;
+            bottom: -20px;
+            left: -20px;
+            font-size: 100px;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+        }
+
+        .gifts-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .gifts-icon {
+            width: 60px;
+            height: 60px;
+            background: #ffc107;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--dark);
+        }
+
+        .gifts-title {
+            flex: 1;
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffc107;
+        }
+
+        .gifts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .gift-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #ffc107;
+        }
+
+        .gift-info h4 {
+            color: #ffc107;
+            margin-bottom: 5px;
+        }
+
+        .gift-info p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .gift-amount {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ffc107;
+        }
+
+        .claim-gift-btn {
+            background: #ffc107;
+            color: var(--dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .claim-gift-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
         }
 
         /* شبكة المحتوى */
@@ -570,7 +706,7 @@
             font-size: 12px;
         }
 
-        /* ===== سجل النشاطات ===== */
+        /* سجل النشاطات */
         .activities-list {
             max-height: 400px;
             overflow-y: auto;
@@ -717,7 +853,7 @@
             color: var(--danger);
         }
 
-        /* ===== الشريط السفلي ===== */
+        /* الشريط السفلي */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
@@ -1101,8 +1237,13 @@
                 font-size: 22px;
             }
             
-            .profit-amount {
-                font-size: 24px;
+            .claim-amount {
+                font-size: 36px;
+            }
+            
+            .claim-btn {
+                font-size: 18px;
+                padding: 15px 30px;
             }
             
             .chat-float-btn {
@@ -1271,8 +1412,33 @@
                 </div>
             </div>
 
-            <!-- الاشتراك الحالي (مع زر تحديث) -->
+            <!-- الاشتراك الحالي -->
             <div id="subscriptionSection" style="position: relative;"></div>
+
+            <!-- قسم الهدايا -->
+            <div class="gifts-section" id="giftsSection">
+                <div class="gifts-header">
+                    <div class="gifts-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="gifts-title">لديك هدايا في انتظارك</div>
+                </div>
+                <div class="gifts-list" id="giftsList"></div>
+            </div>
+
+            <!-- زر المطالبة بالأرباح اليومية -->
+            <div class="claim-section" id="claimSection">
+                <div class="claim-amount" id="claimAmount">0$</div>
+                <div class="claim-label" id="claimLabel">أرباحك اليومية</div>
+                <button class="claim-btn" id="claimBtn" onclick="claimDailyProfit()">
+                    <i class="fas fa-gem"></i>
+                    <span id="claimBtnText">المطالبة بالأرباح</span>
+                </button>
+                <div class="claim-timer" id="claimTimer" style="display: none;">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span id="timerText"></span>
+                </div>
+            </div>
 
             <!-- شبكة المحتوى - سطرين: الإحالة + سجل النشاطات -->
             <div class="content-grid">
@@ -1518,8 +1684,10 @@
         let currentNetwork = 'TRC20';
         let chatCheckInterval = null;
         let activitiesInterval = null;
+        let claimInterval = null;
         let allActivities = [];
         let hasShownAlert = false;
+        let claimStatus = null;
         
         const withdrawalFees = {
             'TRC20': 5,
@@ -1537,39 +1705,30 @@
             await loadWithdrawals();
             await loadReferralStats();
             await loadRecentActivities();
+            await loadGifts();
             await checkForActiveAlerts();
             await checkUnreadMessages();
+            await checkClaimStatus();
             updateUI();
             
-            // إضافة زر التحديث إذا وجد اشتراك
-            setTimeout(addRefreshButton, 1000);
+            addRefreshButton();
             
-            // بدء التحقق من الرسائل غير المقروءة كل 10 ثواني
             chatCheckInterval = setInterval(checkUnreadMessages, 10000);
-            
-            // تحديث النشاطات كل 30 ثانية
             activitiesInterval = setInterval(loadRecentActivities, 30000);
+            claimInterval = setInterval(checkClaimStatus, 60000);
             
-            // التحقق من التنبيهات كل دقيقة
             setInterval(checkForActiveAlerts, 60000);
         });
 
         // التحقق من وجود تنبيهات نشطة
         async function checkForActiveAlerts() {
             try {
-                console.log('🔍 التحقق من التنبيهات النشطة...');
-                
                 const { data, error } = await supabaseClient
                     .from('global_alerts')
                     .select('*')
                     .eq('is_active', true);
                 
-                if (error) {
-                    console.error('خطأ في جلب التنبيهات:', error);
-                    return;
-                }
-                
-                console.log('✅ التنبيهات النشطة:', data);
+                if (error) return;
                 
                 const now = new Date().toISOString();
                 const activeAlerts = data?.filter(alert => {
@@ -1577,17 +1736,13 @@
                     return alert.expires_at > now;
                 }) || [];
                 
-                console.log('✅ التنبيهات بعد الفلترة:', activeAlerts);
-                
                 if (activeAlerts.length > 0 && !hasShownAlert) {
                     const alert = activeAlerts[0];
                     showAlertModal(alert.title, alert.message);
                     hasShownAlert = true;
                     localStorage.setItem('last_alert_time', Date.now().toString());
                 }
-            } catch (error) {
-                console.error('❌ استثناء في التحقق من التنبيهات:', error);
-            }
+            } catch (error) {}
         }
 
         // عرض نافذة التنبيه
@@ -1611,7 +1766,6 @@
             }
             
             currentUser = JSON.parse(savedUser);
-            console.log('المستخدم الحالي:', currentUser);
             
             if (window.supabaseHelpers) {
                 const result = await window.supabaseHelpers.getUserById(currentUser.id);
@@ -1643,64 +1797,97 @@
             }
         }
 
+        // تحميل الهدايا
+        async function loadGifts() {
+            try {
+                const result = await window.supabaseHelpers.getUserGifts(currentUser.id);
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    displayGifts(result.data);
+                } else {
+                    document.getElementById('giftsSection').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الهدايا:', error);
+            }
+        }
+
+        function displayGifts(gifts) {
+            const container = document.getElementById('giftsList');
+            const section = document.getElementById('giftsSection');
+            
+            section.style.display = 'block';
+            
+            let html = '';
+            gifts.forEach(g => {
+                html += `
+                    <div class="gift-item">
+                        <div class="gift-info">
+                            <h4>${g.gifts.title}</h4>
+                            <p>${g.gifts.message}</p>
+                        </div>
+                        <div>
+                            <div class="gift-amount">${g.gifts.amount}$</div>
+                            <button class="claim-gift-btn" onclick="claimGift(${g.id})">
+                                استلام
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        async function claimGift(userGiftId) {
+            const result = await window.supabaseHelpers.claimGift(userGiftId);
+            
+            if (result.success) {
+                showToast(`✅ تم استلام ${result.data.amount}$ هدية`);
+                await loadGifts();
+                await loadUserData();
+            } else {
+                showToast('❌ ' + result.error, 'error');
+            }
+        }
+
         // تحميل الاشتراك
         async function loadSubscription() {
             if (!currentUser) return;
             
             try {
-                console.log('جاري تحميل الاشتراك للمستخدم:', currentUser.id);
-                
                 const result = await window.supabaseHelpers.getUserSubscription(currentUser.id);
-                
-                console.log('نتيجة الاشتراك من قاعدة البيانات:', result);
                 
                 if (result.success && result.data) {
                     subscription = result.data;
-                    console.log('بيانات الاشتراك:', subscription);
                     displaySubscription();
                 } else {
-                    console.log('لا يوجد اشتراك نشط');
                     displayNoSubscription();
                 }
             } catch (error) {
-                console.error('خطأ في تحميل الاشتراك:', error);
                 displayNoSubscription();
             }
         }
 
-        // عرض الاشتراك - مع حساب الأيام المتبقية بشكل صحيح
+        // عرض الاشتراك
         function displaySubscription() {
             if (!subscription) return;
-            
-            console.log('عرض الاشتراك:', subscription);
             
             const startDate = new Date(subscription.start_date);
             const endDate = new Date(subscription.end_date);
             const today = new Date();
             
-            // حساب الأيام المتبقية بشكل صحيح
             const diffTime = endDate - today;
             const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
             
-            // حساب الأيام المنقضية
             const diffPassed = today - startDate;
             const daysPassed = Math.max(0, Math.ceil(diffPassed / (1000 * 60 * 60 * 24)));
             
-            // حساب المدة الإجمالية بالأيام
             const totalDuration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
             
-            // حساب نسبة التقدم (تجنب القيم السالبة)
             let progress = ((daysPassed / totalDuration) * 100).toFixed(1);
             if (progress > 100) progress = 100;
             if (progress < 0) progress = 0;
-            
-            console.log('تاريخ البدء:', startDate);
-            console.log('تاريخ الانتهاء:', endDate);
-            console.log('اليوم:', today);
-            console.log('الأيام المتبقية:', daysLeft);
-            console.log('الأيام المنقضية:', daysPassed);
-            console.log('المدة الإجمالية:', totalDuration);
-            console.log('نسبة التقدم:', progress);
             
             const amount = subscription.amount || 0;
             const dailyProfit = subscription.daily_profit || 0;
@@ -1735,22 +1922,13 @@
                     <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 15px 0; overflow: hidden;">
                         <div style="width: ${progress}%; height: 100%; background: var(--gradient-gold); border-radius: 4px;"></div>
                     </div>
-                    
-                    <div class="profit-timer">
-                        <div>
-                            <span class="profit-amount">+${dailyProfit}$</span>
-                            <span class="profit-time">أرباح اليوم</span>
-                        </div>
-                        <div>
-                            <i class="fas fa-clock" style="color: var(--gold);"></i>
-                            <span class="profit-time">تتجدد يومياً</span>
-                        </div>
-                    </div>
                 </div>
             `;
             
             document.getElementById('subscriptionSection').innerHTML = subscriptionHtml;
             document.getElementById('todayProfit').textContent = dailyProfit + '$';
+            
+            document.getElementById('claimAmount').textContent = dailyProfit + '$';
             
             addRefreshButton();
         }
@@ -1771,6 +1949,11 @@
             
             document.getElementById('subscriptionSection').innerHTML = html;
             document.getElementById('todayProfit').textContent = '0$';
+            document.getElementById('claimAmount').textContent = '0$';
+            
+            const claimBtn = document.getElementById('claimBtn');
+            claimBtn.disabled = true;
+            claimBtn.innerHTML = '<i class="fas fa-lock"></i> تحتاج اشتراك نشط';
         }
 
         // الذهاب لصفحة الباقات
@@ -1813,11 +1996,79 @@
             await loadWithdrawals();
             await loadReferralStats();
             await loadRecentActivities();
+            await loadGifts();
             await checkForActiveAlerts();
             await checkUnreadMessages();
+            await checkClaimStatus();
             updateUI();
             
             showToast('✅ تم تحديث البيانات بنجاح');
+        }
+
+        // ========== نظام المطالبة بالأرباح اليومية ==========
+        async function checkClaimStatus() {
+            if (!currentUser) return;
+            
+            const result = await window.supabaseHelpers.getClaimStatus(currentUser.id);
+            
+            if (result.success) {
+                claimStatus = result.data;
+                updateClaimButton();
+            }
+        }
+
+        function updateClaimButton() {
+            const claimBtn = document.getElementById('claimBtn');
+            const claimTimer = document.getElementById('claimTimer');
+            const timerText = document.getElementById('timerText');
+            
+            if (!claimStatus) {
+                claimBtn.disabled = true;
+                claimBtn.innerHTML = '<i class="fas fa-lock"></i> جاري التحميل...';
+                return;
+            }
+            
+            if (claimStatus.canClaim) {
+                claimBtn.disabled = false;
+                claimBtn.innerHTML = '<i class="fas fa-gem"></i> المطالبة الآن';
+                claimTimer.style.display = 'none';
+            } else {
+                claimBtn.disabled = true;
+                
+                if (claimStatus.reason === 'no_subscription') {
+                    claimBtn.innerHTML = '<i class="fas fa-lock"></i> تحتاج اشتراك نشط';
+                    claimTimer.style.display = 'none';
+                } else {
+                    claimBtn.innerHTML = '<i class="fas fa-hourglass"></i> غير متاح حالياً';
+                    
+                    if (claimStatus.hoursLeft) {
+                        timerText.textContent = `يمكنك المطالبة بعد ${claimStatus.hoursLeft} ساعة`;
+                        claimTimer.style.display = 'block';
+                    }
+                }
+            }
+        }
+
+        async function claimDailyProfit() {
+            if (!claimStatus || !claimStatus.canClaim) return;
+            
+            const result = await window.supabaseHelpers.claimDailyProfit(currentUser.id);
+            
+            if (result.success) {
+                showToast(`✅ تم إضافة ${result.data.amount}$ إلى رصيدك`);
+                await loadUserData();
+                await checkClaimStatus();
+                await loadRecentActivities();
+                
+                // تأثير النجاح
+                const claimBtn = document.getElementById('claimBtn');
+                claimBtn.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    claimBtn.style.transform = 'scale(1)';
+                }, 200);
+            } else {
+                showToast('❌ ' + result.error, 'error');
+            }
         }
 
         // تحميل المعاملات
@@ -2115,6 +2366,7 @@
                         .select('id')
                         .eq('chat_id', chatResult.data.id)
                         .eq('is_read', false)
+                        .eq('is_deleted', false)
                         .neq('user_id', currentUser.id);
                     
                     if (!error && messages && messages.length > 0) {
@@ -2129,9 +2381,7 @@
                     document.getElementById('chatBadge').style.display = 'none';
                     document.getElementById('chatFloatBadge').style.display = 'none';
                 }
-            } catch (error) {
-                console.error('خطأ في التحقق من الرسائل:', error);
-            }
+            } catch (error) {}
         }
 
         // تحديث الواجهة
@@ -2259,6 +2509,7 @@
             if (confirm('هل تريد تسجيل الخروج؟')) {
                 if (chatCheckInterval) clearInterval(chatCheckInterval);
                 if (activitiesInterval) clearInterval(activitiesInterval);
+                if (claimInterval) clearInterval(claimInterval);
                 localStorage.removeItem('current_user');
                 window.location.href = 'index.html';
             }
@@ -2292,7 +2543,6 @@
         // تحديث دوري كل 30 ثانية
         setInterval(async () => {
             if (currentUser && document.visibilityState === 'visible') {
-                console.log('تحديث تلقائي للبيانات...');
                 await loadUserData();
                 await loadTransactions();
                 await loadRecentActivities();
@@ -2307,125 +2557,52 @@
             if (activitiesInterval) {
                 clearInterval(activitiesInterval);
             }
+            if (claimInterval) {
+                clearInterval(claimInterval);
+            }
         });
     </script>
 
     <script src="/pwa-init.js"></script>
 
-
-<script>
-// ================================================
-‎// كود طوارئ - يجلب أرباح الإحالة كل ثانية
-// ================================================
-(function emergencyFix() {
-    console.log('🚨 تشغيل كود الطوارئ لأرباح الإحالة');
-    
-‎    // دالة تجلب القيمة كل ثانية
-    setInterval(async () => {
-        try {
-‎            // من هو المستخدم الحالي؟
-            const savedUser = localStorage.getItem('current_user');
-            if (!savedUser) return;
+    <script>
+        // كود الطوارئ لأرباح الإحالة
+        (function emergencyFix() {
+            console.log('🚨 تشغيل كود الطوارئ لأرباح الإحالة');
             
-            const user = JSON.parse(savedUser);
-            
-‎            // جلب البيانات من قاعدة البيانات مباشرة
-            const { data, error } = await supabaseClient
-                .from('users')
-                .select('referral_earnings, referral_count, balance')
-                .eq('id', user.id)
-                .single();
-            
-            if (error) {
-                console.error('خطأ في جلب البيانات:', error);
-                return;
-            }
-            
-            console.log('📊 بيانات المستخدم:', data);
-            
-‎            // البحث عن العنصر بكل الطرق الممكنة
-            const elements = [
-                document.getElementById('referralEarnings'),
-                document.querySelector('.referral-stat .referral-stat-value:last-child'),
-                document.querySelector('[id="referralEarnings"]'),
-                document.querySelector('.referral-stat:last-child .referral-stat-value')
-            ];
-            
-‎            // تحديث أي عنصر موجود
-            for (let el of elements) {
-                if (el) {
-                    const oldValue = el.textContent;
-                    const newValue = (data?.referral_earnings || 0) + '$';
+            setInterval(async () => {
+                try {
+                    const savedUser = localStorage.getItem('current_user');
+                    if (!savedUser) return;
                     
-                    if (oldValue !== newValue) {
-                        el.textContent = newValue;
-                        console.log('✅ تم تحديث القيمة إلى:', newValue);
+                    const user = JSON.parse(savedUser);
+                    
+                    const { data, error } = await supabaseClient
+                        .from('users')
+                        .select('referral_earnings, referral_count, balance')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    if (error) return;
+                    
+                    const earningsEl = document.getElementById('referralEarnings');
+                    if (earningsEl) {
+                        const oldValue = earningsEl.textContent;
+                        const newValue = (data?.referral_earnings || 0) + '$';
                         
-‎                        // تغيير اللون للتأكيد
-                        el.style.color = '#27ae60';
-                        el.style.fontWeight = 'bold';
-                        el.style.transition = 'all 0.3s';
-                        setTimeout(() => {
-                            el.style.color = 'var(--gold)';
-                        }, 1000);
+                        if (oldValue !== newValue) {
+                            earningsEl.textContent = newValue;
+                        }
                     }
-                }
-            }
-            
-‎            // تحديث كمان الـ totalEarned في الـ stats
-            const totalEarnedEl = document.getElementById('totalEarned');
-            if (totalEarnedEl && data?.balance) {
-                totalEarnedEl.textContent = data.balance + '$';
-            }
-            
-        } catch (e) {
-            console.error('خطأ في كود الطوارئ:', e);
-        }
-‎    }, 1000); // كل ثانية
-    
-‎    // كمان حاول تحديث الصفحة كل 5 ثواني إذا القيمة صفر
-    setInterval(() => {
-        const earningsEl = document.getElementById('referralEarnings');
-        if (earningsEl && earningsEl.textContent === '0$') {
-            console.log('🔄 القيمة صفر، حاول تحديث الصفحة');
-‎            // جب القيمة من الـ localStorage
-            const savedUser = localStorage.getItem('current_user');
-            if (savedUser) {
-                const user = JSON.parse(savedUser);
-                if (user.referral_earnings && user.referral_earnings > 0) {
-                    earningsEl.textContent = user.referral_earnings + '$';
-                }
-            }
-        }
-    }, 3000);
-})();
-</script>
-
-<script>
-// ================================================
-‎// كود تتبع - يعلمنا وين المشكلة
-// ================================================
-setInterval(() => {
-    console.log('🔍 تتبع القيم:');
-    
-‎    // 1. القيمة في الصفحة
-    const earningsEl = document.getElementById('referralEarnings');
-    console.log('1️⃣ القيمة في الصفحة:', earningsEl?.textContent);
-    
-‎    // 2. القيمة في localStorage
-    const savedUser = localStorage.getItem('current_user');
-    if (savedUser) {
-        const user = JSON.parse(savedUser);
-        console.log('2️⃣ القيمة في localStorage:', user.referral_earnings);
-    }
-    
-‎    // 3. القيمة في referralStats
-    if (window.referralStats) {
-        console.log('3️⃣ القيمة في referralStats:', window.referralStats.totalEarned);
-    }
-    
-    console.log('-------------------');
-}, 5000);
-</script>
+                    
+                    const totalEarnedEl = document.getElementById('totalEarned');
+                    if (totalEarnedEl && data?.balance) {
+                        totalEarnedEl.textContent = data.balance + '$';
+                    }
+                    
+                } catch (e) {}
+            }, 1000);
+        })();
+    </script>
 </body>
 </html>

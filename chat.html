@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>الدردشة المباشرة - Elite Capital</title>
+    <title>الدردشة المباشرة</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <link rel="apple-touch-startup-image" href="/icons/icon-512x512.png">
     <meta name="msapplication-TileColor" content="#c8a97e">
-    <meta name="msapplication-TileImage" href="/icons/icon-144x144.png">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
 
     <style>
         * {
@@ -38,7 +38,7 @@
             overflow: hidden;
         }
 
-        /* ===== الهيدر ===== */
+        /* الهيدر */
         .header {
             background: #1e293b;
             padding: 12px 16px;
@@ -116,7 +116,7 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* ===== منطقة المحادثة ===== */
+        /* منطقة المحادثة */
         .chat-area {
             position: fixed;
             top: 70px;
@@ -136,7 +136,6 @@
             display: flex;
             justify-content: flex-end;
             margin-bottom: 8px;
-            position: relative;
         }
 
         .message-user-content {
@@ -148,7 +147,6 @@
             font-size: 15px;
             line-height: 1.5;
             word-wrap: break-word;
-            position: relative;
         }
 
         /* رسالة الدعم */
@@ -156,7 +154,6 @@
             display: flex;
             justify-content: flex-start;
             margin-bottom: 8px;
-            position: relative;
         }
 
         .message-support-content {
@@ -171,57 +168,29 @@
             position: relative;
         }
 
-        /* رسالة صورة */
-        .message-image {
-            max-width: 250px;
-            max-height: 300px;
-            border-radius: 15px;
+        /* رسالة محذوفة */
+        .message-deleted {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px dashed #e74c3c;
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+            padding: 12px 16px;
+            border-radius: 18px;
+            text-align: center;
+        }
+
+        /* الصور في الرسائل */
+        .chat-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-bottom: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
+            border: 2px solid var(--gold);
         }
 
-        .message-image:hover {
-            transform: scale(1.02);
-            border-color: #c8a97e;
-        }
-
-        .message-image.user-image {
-            border-color: #0f172a;
-        }
-
-        .message-image.support-image {
-            border-color: #c8a97e;
-        }
-
-        /* زر حذف الرسالة */
-        .delete-message-btn {
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            width: 28px;
-            height: 28px;
-            background: #e74c3c;
-            border: 2px solid white;
-            border-radius: 50%;
-            color: white;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 10;
-            box-shadow: 0 2px 10px rgba(231,76,60,0.5);
-        }
-
-        .message-user:hover .delete-message-btn,
-        .message-support:hover .delete-message-btn {
-            display: flex;
-        }
-
-        .delete-message-btn:hover {
-            background: #c0392b;
-            transform: scale(1.1);
+        .chat-image:hover {
+            opacity: 0.8;
         }
 
         /* معلومات الرسالة */
@@ -239,6 +208,21 @@
             justify-content: flex-end;
         }
 
+        /* زر الحذف للمسؤول */
+        .delete-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            color: #e74c3c;
+        }
+
         /* فاصل التاريخ */
         .date-divider {
             text-align: center;
@@ -254,7 +238,7 @@
             border: 1px solid rgba(200,169,126,0.2);
         }
 
-        /* ===== منطقة الإدخال ===== */
+        /* منطقة الإدخال */
         .input-area {
             background: #1e293b;
             padding: 12px 16px;
@@ -267,7 +251,6 @@
             right: 0;
             height: 80px;
             z-index: 100;
-            align-items: center;
         }
 
         .input-area input {
@@ -298,35 +281,26 @@
             pointer-events: none;
         }
 
+        /* زر رفع الصور */
         .image-upload-btn {
             width: 56px;
             height: 56px;
-            background: rgba(200,169,126,0.1);
+            background: rgba(200,169,126,0.2);
             border: 2px solid #c8a97e;
             border-radius: 50%;
             color: #c8a97e;
-            font-size: 22px;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
             transition: all 0.3s;
-            position: relative;
         }
 
         .image-upload-btn:hover {
             background: #c8a97e;
             color: #0f172a;
-            transform: scale(1.05);
-        }
-
-        .image-upload-btn input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
         }
 
         .send-btn {
@@ -354,7 +328,45 @@
             pointer-events: none;
         }
 
-        /* ===== صفحة بدء المحادثة ===== */
+        /* معاينة الصورة قبل الإرسال */
+        .image-preview {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            border: 2px solid #c8a97e;
+            border-radius: 20px;
+            padding: 15px;
+            display: none;
+            z-index: 200;
+            max-width: 90%;
+        }
+
+        .image-preview img {
+            max-height: 150px;
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .image-preview-close {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
+            background: #e74c3c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        /* صفحة بدء المحادثة */
         .start-page {
             position: fixed;
             top: 70px;
@@ -413,91 +425,50 @@
             transform: scale(0.98);
         }
 
-        /* ===== نافذة عرض الصورة ===== */
-        .image-viewer {
+        /* نافذة عرض الصورة */
+        .image-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0,0,0,0.95);
-            z-index: 2000;
+            z-index: 10000;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
 
-        .image-viewer.active {
+        .image-modal.active {
             display: flex;
-            animation: fadeIn 0.3s;
         }
 
-        .image-viewer img {
+        .image-modal img {
             max-width: 100%;
             max-height: 90vh;
             border-radius: 20px;
             border: 3px solid #c8a97e;
         }
 
-        .image-viewer-close {
+        .image-modal-close {
             position: absolute;
             top: 20px;
-            left: 20px;
+            right: 20px;
             width: 50px;
             height: 50px;
             background: #e74c3c;
-            border: 2px solid white;
             border-radius: 50%;
-            color: white;
-            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-size: 24px;
             cursor: pointer;
-            z-index: 2001;
+            border: 2px solid white;
         }
 
-        .image-viewer-close:hover {
-            background: #c0392b;
-            transform: scale(1.1);
-        }
-
-        /* ===== مؤشر تحميل الصورة ===== */
-        .image-upload-progress {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1e293b;
-            border: 2px solid #c8a97e;
-            border-radius: 30px;
-            padding: 30px;
-            text-align: center;
-            z-index: 1500;
-            display: none;
-        }
-
-        .image-upload-progress.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        .upload-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border-top-color: #c8a97e;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ===== الإشعارات ===== */
+        /* الإشعارات */
         .toast {
             position: fixed;
             top: 80px;
@@ -519,11 +490,7 @@
             background: #e74c3c;
         }
 
-        .toast.warning {
-            background: #f39c12;
-        }
-
-        /* ===== حالة عدم وجود رسائل ===== */
+        /* حالة عدم وجود رسائل */
         .no-messages {
             text-align: center;
             color: rgba(255,255,255,0.3);
@@ -548,8 +515,8 @@
                 padding: 10px 14px;
             }
             
-            .message-image {
-                max-width: 200px;
+            .chat-image {
+                max-width: 150px;
             }
             
             .input-area input {
@@ -566,6 +533,12 @@
     </style>
 </head>
 <body>
+    <!-- نافذة عرض الصورة -->
+    <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+        <img id="modalImage" src="" alt="">
+        <div class="image-modal-close" onclick="closeImageModal()">&times;</div>
+    </div>
+
     <!-- الهيدر -->
     <div class="header">
         <a href="dashboard.html" class="back-btn" onclick="goBack()">
@@ -581,6 +554,14 @@
         </div>
     </div>
 
+    <!-- معاينة الصورة قبل الإرسال -->
+    <div class="image-preview" id="imagePreview">
+        <img id="previewImage" src="" alt="">
+        <div class="image-preview-close" onclick="clearSelectedImage()">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+
     <!-- منطقة المحادثة (تظهر عند وجود محادثة) -->
     <div id="chatContainer" style="display: none;">
         <div class="chat-area" id="messagesContainer">
@@ -589,11 +570,11 @@
 
         <!-- منطقة الإدخال -->
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." disabled>
-            <label class="image-upload-btn" id="imageUploadBtn">
+            <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            <div class="image-upload-btn" onclick="document.getElementById('imageInput').click()">
                 <i class="fas fa-image"></i>
-                <input type="file" id="imageInput" accept="image/*" disabled onchange="handleImageSelect(event)">
-            </label>
+            </div>
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." disabled>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -613,20 +594,6 @@
         </button>
     </div>
 
-    <!-- نافذة عرض الصورة -->
-    <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
-        <div class="image-viewer-close" onclick="closeImageViewer(event)">
-            <i class="fas fa-times"></i>
-        </div>
-        <img id="viewerImage" src="" alt="صورة">
-    </div>
-
-    <!-- مؤشر تحميل الصورة -->
-    <div class="image-upload-progress" id="uploadProgress">
-        <div class="upload-spinner"></div>
-        <p>جاري رفع الصورة...</p>
-    </div>
-
     <!-- الإشعارات -->
     <div class="toast" id="toast"></div>
 
@@ -634,8 +601,8 @@
         let currentUser = null;
         let currentChat = null;
         let messageInterval = null;
-        let isAdmin = false;
         let selectedImage = null;
+        let isAdmin = false;
 
         // تهيئة الصفحة
         document.addEventListener('DOMContentLoaded', async function() {
@@ -654,8 +621,6 @@
             
             currentUser = JSON.parse(savedUser);
             console.log('المستخدم:', currentUser);
-            
-            isAdmin = currentUser.is_admin || false;
             
             if (window.supabaseHelpers) {
                 const result = await window.supabaseHelpers.getUserById(currentUser.id);
@@ -698,11 +663,9 @@
             
             const messageInput = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
-            const imageInput = document.getElementById('imageInput');
             
             messageInput.disabled = false;
             sendBtn.disabled = false;
-            imageInput.disabled = false;
             
             document.getElementById('chatSubtitle').textContent = 'محادثة نشطة';
             
@@ -783,7 +746,7 @@
             }
         }
 
-        // عرض الرسائل
+        // عرض الرسائل مع دعم الصور والحذف
         function displayMessages(messages) {
             const container = document.getElementById('messagesContainer');
             
@@ -791,6 +754,21 @@
             let lastDate = null;
             
             messages.forEach(msg => {
+                // تجاهل الرسائل المحذوفة إذا كان المستخدم عادي
+                if (msg.is_deleted && !isAdmin) {
+                    html += `
+                        <div class="date-divider">
+                            <span>${new Date(msg.created_at).toLocaleDateString('ar-SA')}</span>
+                        </div>
+                        <div class="message-support">
+                            <div class="message-deleted">
+                                <i class="fas fa-trash"></i> تم حذف هذه الرسالة
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 const isUser = msg.user_id === currentUser.id;
                 const msgDate = new Date(msg.created_at);
                 const dateStr = msgDate.toLocaleDateString('ar-SA');
@@ -808,86 +786,67 @@
                     lastDate = dateStr;
                 }
                 
-                if (isUser) {
-                    if (msg.message_type === 'image') {
-                        html += `
-                            <div class="message-user" id="msg-${msg.id}">
-                                <div style="max-width: 80%; position: relative;">
-                                    ${isAdmin ? `
-                                        <div class="delete-message-btn" onclick="deleteMessage(${msg.id}, event)">
-                                            <i class="fas fa-trash"></i>
-                                        </div>
-                                    ` : ''}
-                                    <img src="${msg.image_url}" class="message-image user-image" onclick="openImageViewer('${msg.image_url}')">
-                                    <div class="message-info">
-                                        <span>أنت</span>
-                                        <span>•</span>
-                                        <span>${timeStr}</span>
-                                        <span>${msg.is_read ? '✓✓' : '✓'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="message-user" id="msg-${msg.id}">
-                                <div style="max-width: 80%; position: relative;">
-                                    ${isAdmin ? `
-                                        <div class="delete-message-btn" onclick="deleteMessage(${msg.id}, event)">
-                                            <i class="fas fa-trash"></i>
-                                        </div>
-                                    ` : ''}
-                                    <div class="message-user-content">${msg.message}</div>
-                                    <div class="message-info">
-                                        <span>أنت</span>
-                                        <span>•</span>
-                                        <span>${timeStr}</span>
-                                        <span>${msg.is_read ? '✓✓' : '✓'}</span>
-                                    </div>
-                                </div>
-                            </div>
+                let messageContent = '';
+                
+                if (msg.is_deleted) {
+                    messageContent = `
+                        <div class="message-deleted">
+                            <i class="fas fa-trash"></i> تم حذف الرسالة
+                        </div>
+                    `;
+                } else {
+                    if (msg.image_url) {
+                        messageContent += `
+                            <img src="${msg.image_url}" class="chat-image" onclick="showImage('${msg.image_url}')">
                         `;
                     }
+                    if (msg.message) {
+                        messageContent += `<div>${msg.message}</div>`;
+                    }
+                }
+                
+                if (isUser) {
+                    html += `
+                        <div class="message-user">
+                            <div style="max-width: 80%;">
+                                <div class="message-user-content">
+                                    ${messageContent}
+                                </div>
+                                <div class="message-info">
+                                    <span>أنت</span>
+                                    <span>•</span>
+                                    <span>${timeStr}</span>
+                                    <span>${msg.is_read ? '✓✓' : '✓'}</span>
+                                    ${isAdmin && !msg.is_deleted ? `
+                                        <button class="delete-btn" onclick="deleteMessage(${msg.id})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 } else {
                     const senderName = msg.users?.is_admin ? 'الدعم' : (msg.users?.name || 'مستخدم');
-                    
-                    if (msg.message_type === 'image') {
-                        html += `
-                            <div class="message-support" id="msg-${msg.id}">
-                                <div style="max-width: 80%; position: relative;">
-                                    ${isAdmin ? `
-                                        <div class="delete-message-btn" onclick="deleteMessage(${msg.id}, event)">
+                    html += `
+                        <div class="message-support">
+                            <div style="max-width: 80%;">
+                                <div class="message-support-content">
+                                    ${messageContent}
+                                </div>
+                                <div class="message-info">
+                                    <span>${senderName}</span>
+                                    <span>•</span>
+                                    <span>${timeStr}</span>
+                                    ${isAdmin && !msg.is_deleted ? `
+                                        <button class="delete-btn" onclick="deleteMessage(${msg.id})">
                                             <i class="fas fa-trash"></i>
-                                        </div>
+                                        </button>
                                     ` : ''}
-                                    <img src="${msg.image_url}" class="message-image support-image" onclick="openImageViewer('${msg.image_url}')">
-                                    <div class="message-info">
-                                        <span>${senderName}</span>
-                                        <span>•</span>
-                                        <span>${timeStr}</span>
-                                    </div>
                                 </div>
                             </div>
-                        `;
-                    } else {
-                        html += `
-                            <div class="message-support" id="msg-${msg.id}">
-                                <div style="max-width: 80%; position: relative;">
-                                    ${isAdmin ? `
-                                        <div class="delete-message-btn" onclick="deleteMessage(${msg.id}, event)">
-                                            <i class="fas fa-trash"></i>
-                                        </div>
-                                    ` : ''}
-                                    <div class="message-support-content">${msg.message}</div>
-                                    <div class="message-info">
-                                        <span>${senderName}</span>
-                                        <span>•</span>
-                                        <span>${timeStr}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
+                        </div>
+                    `;
                 }
             });
             
@@ -899,24 +858,83 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // إرسال رسالة نصية
+        // إرسال رسالة (نص أو صورة)
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
-            if (!message || !currentChat) {
+            if ((!message && !selectedImage) || !currentChat) {
+                console.log('لا يمكن الإرسال');
                 return;
             }
             
-            input.value = '';
+            console.log('إرسال رسالة:', { message, hasImage: !!selectedImage });
             
-            const result = await window.supabaseHelpers.sendChatMessage(
-                currentChat.id,
-                currentUser.id,
-                message
-            );
+            // إرسال الصورة أولاً إذا وجدت
+            if (selectedImage) {
+                await sendImageMessage(selectedImage);
+            }
+            
+            // إرسال النص إذا وجد
+            if (message) {
+                input.value = '';
+                const result = await window.supabaseHelpers.sendChatMessage(
+                    currentChat.id,
+                    currentUser.id,
+                    message
+                );
+                
+                if (result.success) {
+                    console.log('تم إرسال الرسالة النصية');
+                } else {
+                    showToast('❌ ' + result.error, 'error');
+                }
+            }
+            
+            // تنظيف معاينة الصورة
+            clearSelectedImage();
+            
+            // تحميل الرسائل الجديدة
+            await loadMessages();
+        }
+
+        // إرسال رسالة صورة
+        async function sendImageMessage(imageData) {
+            try {
+                // تحويل base64 إلى blob
+                const response = await fetch(imageData);
+                const blob = await response.blob();
+                const file = new File([blob], 'chat_image.jpg', { type: 'image/jpeg' });
+                
+                const uploadResult = await window.supabaseHelpers.uploadChatImage(file, currentUser.id);
+                
+                if (uploadResult.success) {
+                    await window.supabaseHelpers.sendChatMessage(
+                        currentChat.id,
+                        currentUser.id,
+                        null,
+                        uploadResult.url
+                    );
+                    showToast('✅ تم إرسال الصورة');
+                } else {
+                    showToast('❌ فشل رفع الصورة', 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في إرسال الصورة:', error);
+                showToast('❌ حدث خطأ في إرسال الصورة', 'error');
+            }
+        }
+
+        // حذف رسالة (للمسؤول فقط)
+        async function deleteMessage(messageId) {
+            if (!isAdmin) return;
+            
+            if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+            
+            const result = await window.supabaseHelpers.deleteChatMessage(messageId, currentUser.id);
             
             if (result.success) {
+                showToast('✅ تم حذف الرسالة');
                 await loadMessages();
             } else {
                 showToast('❌ ' + result.error, 'error');
@@ -924,105 +942,40 @@
         }
 
         // اختيار صورة
-        function handleImageSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            selectedImage = file;
-            
-            // التحقق من حجم الصورة (5 ميجابايت كحد أقصى)
-            if (file.size > 5 * 1024 * 1024) {
-                showToast('❌ حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'error');
-                return;
-            }
-            
-            // إرسال الصورة مباشرة
-            sendImage();
-        }
-
-        // إرسال صورة
-        async function sendImage() {
-            if (!selectedImage || !currentChat) return;
-            
-            // إظهار مؤشر التحميل
-            document.getElementById('uploadProgress').classList.add('active');
-            
-            // تعطيل الأزرار مؤقتاً
-            document.getElementById('imageInput').disabled = true;
-            document.getElementById('sendBtn').disabled = true;
-            
-            try {
-                const result = await window.supabaseHelpers.sendChatImage(
-                    currentChat.id,
-                    currentUser.id,
-                    selectedImage
-                );
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            if (e.target.files[0]) {
+                const file = e.target.files[0];
                 
-                if (result.success) {
-                    await loadMessages();
-                    showToast('✅ تم إرسال الصورة');
-                } else {
-                    showToast('❌ ' + result.error, 'error');
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('❌ حجم الصورة كبير جداً (الحد الأقصى 5MB)', 'error');
+                    return;
                 }
-            } catch (error) {
-                console.error('خطأ في إرسال الصورة:', error);
-                showToast('❌ حدث خطأ في إرسال الصورة', 'error');
-            } finally {
-                // إخفاء مؤشر التحميل وإعادة تمكين الأزرار
-                document.getElementById('uploadProgress').classList.remove('active');
-                document.getElementById('imageInput').disabled = false;
-                document.getElementById('sendBtn').disabled = false;
-                document.getElementById('imageInput').value = '';
-                selectedImage = null;
-            }
-        }
-
-        // حذف رسالة (للمسؤول فقط)
-        async function deleteMessage(messageId, event) {
-            if (event) {
-                event.stopPropagation();
-            }
-            
-            if (!isAdmin) {
-                showToast('❌ غير مصرح لك بحذف الرسائل', 'error');
-                return;
-            }
-            
-            if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
-                return;
-            }
-            
-            try {
-                const result = await window.supabaseHelpers.deleteChatMessage(
-                    messageId,
-                    currentUser.id,
-                    isAdmin
-                );
                 
-                if (result.success) {
-                    showToast('✅ تم حذف الرسالة');
-                    await loadMessages();
-                } else {
-                    showToast('❌ ' + result.error, 'error');
-                }
-            } catch (error) {
-                console.error('خطأ في حذف الرسالة:', error);
-                showToast('❌ حدث خطأ', 'error');
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedImage = event.target.result;
+                    document.getElementById('previewImage').src = selectedImage;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
+        });
+
+        // إلغاء الصورة المختارة
+        function clearSelectedImage() {
+            selectedImage = null;
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageInput').value = '';
         }
 
-        // فتح نافذة عرض الصورة
-        function openImageViewer(imageUrl) {
-            document.getElementById('viewerImage').src = imageUrl;
-            document.getElementById('imageViewer').classList.add('active');
+        // عرض الصورة بالحجم الكبير
+        function showImage(url) {
+            document.getElementById('modalImage').src = url;
+            document.getElementById('imageModal').classList.add('active');
         }
 
-        // إغلاق نافذة عرض الصورة
-        function closeImageViewer(event) {
-            if (event) {
-                event.stopPropagation();
-            }
-            document.getElementById('imageViewer').classList.remove('active');
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
         }
 
         // إرسال بالضغط على Enter
@@ -1045,7 +998,7 @@
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.className = 'toast ' + (type === 'error' ? 'error' : type === 'warning' ? 'warning' : '');
+            toast.className = 'toast ' + (type === 'error' ? 'error' : '');
             toast.style.display = 'block';
             
             setTimeout(() => {
@@ -1062,5 +1015,6 @@
     </script>
 
     <script src="/pwa-init.js"></script>
+
 </body>
 </html>
