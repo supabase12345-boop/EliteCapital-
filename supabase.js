@@ -1,5 +1,5 @@
 // ===================================
-// supabase.js - Elite Capital (نسخة محدثة مع أنظمة الرهان والألعاب)
+// supabase.js - Elite Capital (نسخة محدثة بالكامل)
 // ===================================
 
 const SUPABASE_URL = 'https://macbjaiunubocfyhvbvd.supabase.co';
@@ -16,7 +16,7 @@ let supabaseClient = null;
                 get: () => undefined,
                 configurable: true
             });
-
+            
             setTimeout(() => {
                 Object.defineProperty(navigator, 'locks', {
                     get: () => originalLocks,
@@ -33,7 +33,7 @@ function initSupabase() {
         console.error('❌ مكتبة Supabase غير محملة');
         return null;
     }
-
+    
     try {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
@@ -65,19 +65,19 @@ function generateReferralCode(username) {
 async function registerUser(userData) {
     try {
         console.log('بدء تسجيل مستخدم جديد:', userData.email);
-
+        
         const { data: existing, error: checkError } = await supabaseClient
             .from('users')
             .select('id')
             .or(`email.eq.${userData.email},username.eq.${userData.username}`)
             .maybeSingle();
-
+        
         if (existing) {
             throw new Error('البريد الإلكتروني أو اسم المستخدم مستخدم مسبقاً');
         }
-
+        
         const referralCode = generateReferralCode(userData.username);
-
+        
         let referredBy = null;
         if (userData.referralCode) {
             const { data: referrer } = await supabaseClient
@@ -85,12 +85,12 @@ async function registerUser(userData) {
                 .select('referral_code')
                 .eq('referral_code', userData.referralCode)
                 .maybeSingle();
-
+            
             if (referrer) {
                 referredBy = userData.referralCode;
             }
         }
-
+        
         const newUserData = {
             name: userData.name,
             username: userData.username,
@@ -116,15 +116,15 @@ async function registerUser(userData) {
             suspension_reason: null,
             suspended_until: null
         };
-
+        
         const { data: newUser, error } = await supabaseClient
             .from('users')
             .insert([newUserData])
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         return { success: true, data: newUser };
     } catch (error) {
         console.error('خطأ في التسجيل:', error);
@@ -139,11 +139,11 @@ async function loginUser(usernameOrEmail, password) {
             .select('*')
             .or(`email.eq.${usernameOrEmail},username.eq.${usernameOrEmail}`)
             .maybeSingle();
-
+        
         if (error) throw error;
         if (!user) throw new Error('المستخدم غير موجود');
         if (user.password !== password) throw new Error('كلمة المرور غير صحيحة');
-
+        
         // التحقق من حالة التعليق
         if (user.is_suspended) {
             if (user.suspended_until && new Date(user.suspended_until) > new Date()) {
@@ -160,16 +160,16 @@ async function loginUser(usernameOrEmail, password) {
                     .eq('id', user.id);
             }
         }
-
+        
         if (user.status === 'banned') throw new Error('حسابك محظور');
-
+        
         await supabaseClient
             .from('users')
             .update({ last_login: new Date().toISOString() })
             .eq('id', user.id);
-
+        
         await addLoginActivity(user.id);
-
+        
         return { success: true, data: user };
     } catch (error) {
         return { success: false, error: error.message };
@@ -183,7 +183,7 @@ async function getUserById(id) {
             .select('*')
             .eq('id', id)
             .single();
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -202,7 +202,7 @@ async function updateUser(id, updates) {
             .eq('id', id)
             .select()
             .single();
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -216,7 +216,7 @@ async function getAllUsers() {
             .from('users')
             .select('*')
             .order('created_at', { ascending: false });
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -230,16 +230,16 @@ async function updateUserStatus(id, status, reason = null) {
             status,
             updated_at: new Date().toISOString()
         };
-
+        
         if (reason) {
             updates.status_reason = reason;
         }
-
+        
         const { error } = await supabaseClient
             .from('users')
             .update(updates)
             .eq('id', id);
-
+        
         if (error) throw error;
         return { success: true };
     } catch (error) {
@@ -256,13 +256,13 @@ async function handleDoubleClaimViolation(userId) {
             .select('violation_count, is_suspended')
             .eq('id', userId)
             .single();
-
+        
         const newViolationCount = (user.violation_count || 0) + 1;
-
+        
         // تعليق الحساب فوراً
         const suspendUntil = new Date();
         suspendUntil.setDate(suspendUntil.getDate() + (newViolationCount * 7)); // أسبوع لكل مخالفة
-
+        
         await supabaseClient
             .from('users')
             .update({
@@ -273,7 +273,7 @@ async function handleDoubleClaimViolation(userId) {
                 updated_at: new Date().toISOString()
             })
             .eq('id', userId);
-
+        
         // تسجيل النشاط
         await addActivity({
             userId: userId,
@@ -282,7 +282,7 @@ async function handleDoubleClaimViolation(userId) {
             description: `محاولة مطالبة مزدوجة - تم تعليق الحساب حتى ${suspendUntil.toLocaleDateString('ar-SA')}`,
             status: 'suspended'
         });
-
+        
         return { 
             success: true, 
             data: {
@@ -304,7 +304,7 @@ async function getAllPackages() {
             .select('*')
             .eq('status', 'active')
             .order('price', { ascending: true });
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -319,7 +319,7 @@ async function getPackageById(id) {
             .select('*')
             .eq('id', id)
             .single();
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -330,7 +330,7 @@ async function getPackageById(id) {
 async function createPackage(packageData) {
     try {
         const profitPercentage = (packageData.dailyProfit / packageData.price) * 100;
-
+        
         const { data, error } = await supabaseClient
             .from('packages')
             .insert([{
@@ -347,7 +347,7 @@ async function createPackage(packageData) {
             }])
             .select()
             .single();
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -364,7 +364,7 @@ async function updatePackage(id, updates) {
                 updated_at: new Date().toISOString()
             })
             .eq('id', id);
-
+        
         if (error) throw error;
         return { success: true };
     } catch (error) {
@@ -378,7 +378,7 @@ async function deletePackage(id) {
             .from('packages')
             .update({ status: 'deleted' })
             .eq('id', id);
-
+        
         if (error) throw error;
         return { success: true };
     } catch (error) {
@@ -394,13 +394,13 @@ async function createPendingPackage(pendingData) {
             .select('id, name, email, phone, referred_by')
             .eq('id', pendingData.userId)
             .single();
-
+        
         const { data: pkg } = await supabaseClient
             .from('packages')
             .select('id, name, category, duration, duration_type, daily_profit, price')
             .eq('id', pendingData.packageId)
             .single();
-
+        
         const insertData = {
             user_id: user.id,
             user_name: user.name || 'مستخدم',
@@ -421,17 +421,17 @@ async function createPendingPackage(pendingData) {
             status: 'pending',
             created_at: new Date().toISOString()
         };
-
+        
         const { data, error } = await supabaseClient
             .from('pending_packages')
             .insert([insertData])
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         await addSubscriptionActivity(user.id, pkg.price, pkg.name, 'pending');
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -445,7 +445,7 @@ async function getPendingPackages() {
             .select('*')
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -460,22 +460,22 @@ async function approvePendingPackage(id, adminId) {
             .select('*')
             .eq('id', id)
             .single();
-
+        
         if (fetchError) throw fetchError;
-
+        
         const { data: pkg } = await supabaseClient
             .from('packages')
             .select('duration, duration_type, daily_profit')
             .eq('id', pending.package_id)
             .single();
-
+        
         const startDate = new Date();
         const endDate = new Date();
-
+        
         if (pkg) {
             const duration = pkg.duration || 30;
             const durationType = pkg.duration_type || 'day';
-
+            
             if (durationType === 'day') {
                 endDate.setDate(endDate.getDate() + duration);
             } else if (durationType === 'month') {
@@ -486,7 +486,7 @@ async function approvePendingPackage(id, adminId) {
         } else {
             endDate.setDate(endDate.getDate() + 30);
         }
-
+        
         await supabaseClient
             .from('pending_packages')
             .update({ 
@@ -495,7 +495,7 @@ async function approvePendingPackage(id, adminId) {
                 processed_at: new Date().toISOString()
             })
             .eq('id', id);
-
+        
         const { data: subscription, error: subError } = await supabaseClient
             .from('subscriptions')
             .insert([{
@@ -513,9 +513,9 @@ async function approvePendingPackage(id, adminId) {
             }])
             .select()
             .single();
-
+        
         if (subError) throw subError;
-
+        
         await supabaseClient
             .from('users')
             .update({ 
@@ -524,7 +524,7 @@ async function approvePendingPackage(id, adminId) {
                 updated_at: new Date().toISOString()
             })
             .eq('id', pending.user_id);
-
+        
         await supabaseClient
             .from('transactions')
             .insert([{
@@ -536,13 +536,13 @@ async function approvePendingPackage(id, adminId) {
                 subscription_id: subscription.id,
                 created_at: new Date().toISOString()
             }]);
-
+        
         if (pending.referred_by) {
             await processReferralRewards(pending.user_id, pending.referred_by);
         }
-
+        
         await addSubscriptionActivity(pending.user_id, pending.amount, pending.package_name, 'approved');
-
+        
         return { success: true, data: subscription };
     } catch (error) {
         return { success: false, error: error.message };
@@ -560,9 +560,9 @@ async function rejectPendingPackage(id, reason, adminId) {
                 processed_at: new Date().toISOString()
             })
             .eq('id', id);
-
+        
         if (error) throw error;
-
+        
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -578,11 +578,11 @@ async function claimDailyProfit(userId) {
             .select('is_suspended, violation_count')
             .eq('id', userId)
             .single();
-
+        
         if (user.is_suspended) {
             throw new Error('حسابك معلق مؤقتاً');
         }
-
+        
         const { data: subscription, error: subError } = await supabaseClient
             .from('subscriptions')
             .select('*')
@@ -591,17 +591,17 @@ async function claimDailyProfit(userId) {
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
-
+        
         if (subError || !subscription) {
             throw new Error('لا يوجد اشتراك نشط');
         }
-
+        
         const now = new Date();
         const lastClaim = subscription.last_claim_date ? new Date(subscription.last_claim_date) : null;
-
+        
         if (lastClaim) {
             const hoursSinceLastClaim = (now - lastClaim) / (1000 * 60 * 60);
-
+            
             // إذا حاول المستخدم المطالبة قبل 24 ساعة
             if (hoursSinceLastClaim < 24) {
                 // تسجيل مخالفة
@@ -609,15 +609,15 @@ async function claimDailyProfit(userId) {
                 throw new Error('⚠️ تم تسجيل مخالفة! لا يمكنك المطالبة إلا مرة واحدة كل 24 ساعة');
             }
         }
-
+        
         const profitAmount = subscription.daily_profit;
-
+        
         const { data: userBalance } = await supabaseClient
             .from('users')
             .select('balance, total_earned')
             .eq('id', userId)
             .single();
-
+        
         await supabaseClient
             .from('users')
             .update({ 
@@ -625,14 +625,14 @@ async function claimDailyProfit(userId) {
                 total_earned: (userBalance.total_earned || 0) + profitAmount
             })
             .eq('id', userId);
-
+        
         await supabaseClient
             .from('subscriptions')
             .update({ 
                 last_claim_date: now.toISOString()
             })
             .eq('id', subscription.id);
-
+        
         const { data: profit } = await supabaseClient
             .from('daily_profits')
             .insert([{
@@ -644,7 +644,7 @@ async function claimDailyProfit(userId) {
             }])
             .select()
             .single();
-
+        
         await supabaseClient
             .from('transactions')
             .insert([{
@@ -656,9 +656,9 @@ async function claimDailyProfit(userId) {
                 subscription_id: subscription.id,
                 created_at: now.toISOString()
             }]);
-
+        
         await addProfitActivity(userId, profitAmount, subscription.package_name);
-
+        
         return { 
             success: true, 
             data: {
@@ -681,14 +681,14 @@ async function getClaimStatus(userId) {
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
-
+        
         if (error || !subscription) {
             return { success: true, data: { canClaim: false, reason: 'no_subscription' } };
         }
-
+        
         const now = new Date();
         const lastClaim = subscription.last_claim_date ? new Date(subscription.last_claim_date) : null;
-
+        
         if (!lastClaim) {
             return { 
                 success: true, 
@@ -699,9 +699,9 @@ async function getClaimStatus(userId) {
                 }
             };
         }
-
+        
         const hoursSinceLastClaim = (now - lastClaim) / (1000 * 60 * 60);
-
+        
         if (hoursSinceLastClaim >= 24) {
             return { 
                 success: true, 
@@ -714,7 +714,7 @@ async function getClaimStatus(userId) {
         } else {
             const hoursLeft = 24 - hoursSinceLastClaim;
             const nextClaimTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
-
+            
             return { 
                 success: true, 
                 data: { 
@@ -739,18 +739,18 @@ async function processReferralRewards(newUserId, referralCode) {
             .select('*')
             .eq('referral_code', referralCode)
             .single();
-
+        
         if (!referrer) return { success: false };
-
+        
         const REFERRER_REWARD = 50;
         const REFEREE_REWARD = 20;
-
+        
         const { data: newUser } = await supabaseClient
             .from('users')
             .select('*')
             .eq('id', newUserId)
             .single();
-
+        
         await supabaseClient
             .from('users')
             .update({ 
@@ -759,7 +759,7 @@ async function processReferralRewards(newUserId, referralCode) {
                 updated_at: new Date().toISOString()
             })
             .eq('id', newUserId);
-
+        
         await supabaseClient
             .from('users')
             .update({ 
@@ -769,7 +769,7 @@ async function processReferralRewards(newUserId, referralCode) {
                 updated_at: new Date().toISOString()
             })
             .eq('id', referrer.id);
-
+        
         const transactions = [
             {
                 user_id: newUserId,
@@ -792,9 +792,9 @@ async function processReferralRewards(newUserId, referralCode) {
                 created_at: new Date().toISOString()
             }
         ];
-
+        
         await supabaseClient.from('transactions').insert(transactions);
-
+        
         return { success: true };
     } catch (error) {
         return { success: false };
@@ -808,15 +808,15 @@ async function getReferralStats(userId) {
             .select('*')
             .eq('id', userId)
             .single();
-
+        
         const { data: referredUsers } = await supabaseClient
             .from('users')
             .select('id, name, email, joined_date, has_active_subscription, referral_reward_paid')
             .eq('referred_by', user.referral_code);
-
+        
         const totalEarned = user.referral_earnings || 0;
         const activeReferrals = referredUsers?.filter(u => u.has_active_subscription).length || 0;
-
+        
         return {
             success: true,
             data: {
@@ -844,7 +844,7 @@ async function getUserSubscription(userId) {
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -860,12 +860,12 @@ async function createWithdrawal(withdrawalData) {
             .select('balance')
             .eq('id', withdrawalData.userId)
             .single();
-
+        
         const totalAmount = withdrawalData.amount + withdrawalData.fee;
         if (user.balance < totalAmount) {
             throw new Error('الرصيد غير كافي');
         }
-
+        
         const { data, error } = await supabaseClient
             .from('withdrawals')
             .insert([{
@@ -880,9 +880,9 @@ async function createWithdrawal(withdrawalData) {
             }])
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         await supabaseClient
             .from('users')
             .update({ 
@@ -890,7 +890,7 @@ async function createWithdrawal(withdrawalData) {
                 total_withdrawn: (user.total_withdrawn || 0) + withdrawalData.amount
             })
             .eq('id', withdrawalData.userId);
-
+        
         await supabaseClient
             .from('transactions')
             .insert([{
@@ -902,9 +902,9 @@ async function createWithdrawal(withdrawalData) {
                 withdrawal_id: data.id,
                 created_at: new Date().toISOString()
             }]);
-
+        
         await addWithdrawalActivity(withdrawalData.userId, withdrawalData.amount, 'pending');
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -918,7 +918,7 @@ async function getUserWithdrawals(userId) {
             .select('*')
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -932,13 +932,13 @@ async function getAllWithdrawals(status = null) {
             .from('withdrawals')
             .select('*, users(name, email)')
             .order('created_at', { ascending: false });
-
+        
         if (status) {
             query = query.eq('status', status);
         }
-
+        
         const { data, error } = await query;
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -957,33 +957,33 @@ async function updateWithdrawalStatus(id, status, adminId, txHash = null) {
             processed_by: adminId,
             processed_at: new Date().toISOString()
         };
-
+        
         if (txHash) updates.transaction_hash = txHash;
-
+        
         const { data, error } = await supabaseClient
             .from('withdrawals')
             .update(updates)
             .eq('id', id)
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         if (status === 'rejected') {
             const { data: user } = await supabaseClient
                 .from('users')
                 .select('balance')
                 .eq('id', data.user_id)
                 .single();
-
+            
             await supabaseClient
                 .from('users')
                 .update({ balance: user.balance + data.total })
                 .eq('id', data.user_id);
         }
-
+        
         await addWithdrawalActivity(data.user_id, data.amount, status);
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -999,7 +999,7 @@ async function getUserTransactions(userId, limit = 50) {
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(limit);
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -1014,7 +1014,7 @@ async function getAllTransactions() {
             .select('*, users(name, email)')
             .order('created_at', { ascending: false })
             .limit(500);
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -1036,20 +1036,20 @@ async function sendGift(giftData) {
             status: 'active',
             created_at: new Date().toISOString()
         };
-
+        
         const { data: gift, error } = await supabaseClient
             .from('gifts')
             .insert([giftRecord])
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         if (giftData.targetType === 'all') {
             const { data: users } = await supabaseClient
                 .from('users')
                 .select('id');
-
+            
             for (const user of users) {
                 await supabaseClient
                     .from('user_gifts')
@@ -1070,7 +1070,7 @@ async function sendGift(giftData) {
                     created_at: new Date().toISOString()
                 }]);
         }
-
+        
         return { success: true, data: gift };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1088,7 +1088,7 @@ async function getUserGifts(userId) {
             .eq('user_id', userId)
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -1103,22 +1103,22 @@ async function claimGift(userGiftId) {
             .select('*, gifts:gift_id(*)')
             .eq('id', userGiftId)
             .single();
-
+        
         if (!userGift) throw new Error('الهدية غير موجودة');
-
+        
         const amount = userGift.gifts.amount;
-
+        
         const { data: user } = await supabaseClient
             .from('users')
             .select('balance')
             .eq('id', userGift.user_id)
             .single();
-
+        
         await supabaseClient
             .from('users')
             .update({ balance: (user.balance || 0) + amount })
             .eq('id', userGift.user_id);
-
+        
         await supabaseClient
             .from('user_gifts')
             .update({ 
@@ -1126,7 +1126,7 @@ async function claimGift(userGiftId) {
                 claimed_at: new Date().toISOString()
             })
             .eq('id', userGiftId);
-
+        
         await supabaseClient
             .from('transactions')
             .insert([{
@@ -1137,7 +1137,7 @@ async function claimGift(userGiftId) {
                 status: 'completed',
                 created_at: new Date().toISOString()
             }]);
-
+        
         return { success: true, data: { amount } };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1150,7 +1150,7 @@ async function getAllGifts() {
             .from('gifts')
             .select('*')
             .order('created_at', { ascending: false });
-
+        
         if (error) throw error;
         return { success: true, data };
     } catch (error) {
@@ -1167,54 +1167,34 @@ async function getDashboardStats() {
             pendingPackagesRes,
             subscriptionsRes,
             withdrawalsRes,
-            giftsRes,
-            // إحصائيات جديدة للرهان والألعاب
-            betsRes,
-            gamesRes
+            giftsRes
         ] = await Promise.all([
             supabaseClient.from('users').select('*', { count: 'exact', head: false }),
             supabaseClient.from('packages').select('*').eq('status', 'active'),
             supabaseClient.from('pending_packages').select('*').eq('status', 'pending'),
             supabaseClient.from('subscriptions').select('*').eq('status', 'active'),
             supabaseClient.from('withdrawals').select('*'),
-            supabaseClient.from('gifts').select('*'),
-            // جلب إحصائيات الرهان والألعاب من جداول منفصلة (يفضل إنشاء جداول منفصلة للإحصائيات)
-            supabaseClient.from('bets').select('*'),
-            supabaseClient.from('games').select('*')
+            supabaseClient.from('gifts').select('*')
         ]);
-
+        
         const users = usersRes.data || [];
         const packages = packagesRes.data || [];
         const pendingPackages = pendingPackagesRes.data || [];
         const subscriptions = subscriptionsRes.data || [];
         const withdrawals = withdrawalsRes.data || [];
         const gifts = giftsRes.data || [];
-        const bets = betsRes.data || [];
-        const games = gamesRes.data || [];
-
+        
         const totalDeposits = users.reduce((sum, u) => sum + (u.total_earned || 0), 0);
         const totalWithdrawals = withdrawals
             .filter(w => w.status === 'completed')
             .reduce((sum, w) => sum + w.amount, 0);
-
+        
         const activeUsers = users.filter(u => u.status === 'active' || !u.status).length;
         const suspendedUsers = users.filter(u => u.is_suspended).length;
         const bannedUsers = users.filter(u => u.status === 'banned').length;
-
+        
         const pendingGifts = gifts.filter(g => g.status === 'active').length;
         
-        // إحصائيات الرهان
-        const totalBetsAmount = bets.reduce((sum, b) => sum + (b.amount || 0), 0);
-        const totalBetsWon = bets.filter(b => b.status === 'won').reduce((sum, b) => sum + (b.amount || 0), 0);
-        const totalBetsLost = bets.filter(b => b.status === 'lost').reduce((sum, b) => sum + (b.amount || 0), 0);
-        const bettingProfit = totalBetsLost - totalBetsWon; // ربح المنصة
-
-        // إحصائيات الألعاب
-        const totalGamesAmount = games.reduce((sum, g) => sum + (g.amount || 0), 0);
-        const totalGamesWon = games.filter(g => g.status === 'won').reduce((sum, g) => sum + (g.amount || 0), 0);
-        const totalGamesLost = games.filter(g => g.status === 'lost').reduce((sum, g) => sum + (g.amount || 0), 0);
-        const gamesProfit = totalGamesLost - totalGamesWon; // ربح المنصة
-
         return {
             success: true,
             data: {
@@ -1228,20 +1208,10 @@ async function getDashboardStats() {
                 pendingPackages: pendingPackages.length,
                 pendingWithdrawals: withdrawals.filter(w => w.status === 'pending').length,
                 packagesCount: packages.length,
-                pendingGifts: pendingGifts,
-                // إحصائيات جديدة
-                totalBetsAmount,
-                totalBetsWon,
-                totalBetsLost,
-                bettingProfit,
-                totalGamesAmount,
-                totalGamesWon,
-                totalGamesLost,
-                gamesProfit
+                pendingGifts: pendingGifts
             }
         };
     } catch (error) {
-        console.error('خطأ في جلب إحصائيات لوحة التحكم:', error);
         return { success: false, error: error.message };
     }
 }
@@ -1258,7 +1228,7 @@ async function uploadChatImage(file, userId) {
             reader.onload = async () => {
                 try {
                     const base64 = reader.result;
-
+                    
                     const { data, error } = await supabaseClient
                         .from('chat_images')
                         .insert([{
@@ -1315,11 +1285,11 @@ async function startLiveChat(userId) {
             .eq('user_id', userId)
             .eq('status', 'active')
             .maybeSingle();
-
+        
         if (existingChat) {
             return { success: true, data: existingChat, isNew: false };
         }
-
+        
         const { data: newChat, error: createError } = await supabaseClient
             .from('live_chats')
             .insert([{
@@ -1330,9 +1300,9 @@ async function startLiveChat(userId) {
             }])
             .select()
             .single();
-
+        
         if (createError) throw createError;
-
+        
         return { success: true, data: newChat, isNew: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1344,7 +1314,7 @@ async function sendChatMessage(chatId, userId, message, imageRef = null) {
         if ((!message || !message.trim()) && !imageRef) {
             throw new Error('الرسالة أو الصورة مطلوبة');
         }
-
+        
         const { data: newMessage, error: msgError } = await supabaseClient
             .from('chat_messages')
             .insert([{
@@ -1356,14 +1326,14 @@ async function sendChatMessage(chatId, userId, message, imageRef = null) {
             }])
             .select()
             .single();
-
+        
         if (msgError) throw msgError;
-
+        
         await supabaseClient
             .from('live_chats')
             .update({ last_message_at: new Date().toISOString() })
             .eq('id', chatId);
-
+        
         return { success: true, data: newMessage };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1384,9 +1354,9 @@ async function getChatMessages(chatId) {
             `)
             .eq('chat_id', chatId)
             .order('created_at', { ascending: true });
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1404,9 +1374,9 @@ async function markMessagesAsRead(chatId, userId) {
             .eq('chat_id', chatId)
             .neq('user_id', userId)
             .eq('is_read', false);
-
+        
         if (error) throw error;
-
+        
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1423,9 +1393,9 @@ async function deleteChatMessage(messageId, adminId) {
                 deleted_at: new Date().toISOString()
             })
             .eq('id', messageId);
-
+        
         if (error) throw error;
-
+        
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1447,9 +1417,9 @@ async function getActiveChats() {
             `)
             .eq('status', 'active')
             .order('last_message_at', { ascending: false });
-
+        
         if (error) throw error;
-
+        
         for (let chat of data || []) {
             const { data: lastMessage } = await supabaseClient
                 .from('chat_messages')
@@ -1459,9 +1429,9 @@ async function getActiveChats() {
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .single();
-
+            
             chat.last_message = lastMessage;
-
+            
             const { count } = await supabaseClient
                 .from('chat_messages')
                 .select('*', { count: 'exact', head: true })
@@ -1469,10 +1439,10 @@ async function getActiveChats() {
                 .eq('is_read', false)
                 .eq('is_deleted', false)
                 .neq('user_id', chat.admin_id);
-
+            
             chat.unread_count = count || 0;
         }
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1488,9 +1458,9 @@ async function joinChat(chatId, adminId) {
                 updated_at: new Date().toISOString()
             })
             .eq('id', chatId);
-
+        
         if (error) throw error;
-
+        
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1506,9 +1476,9 @@ async function closeChat(chatId) {
                 ended_at: new Date().toISOString()
             })
             .eq('id', chatId);
-
+        
         if (error) throw error;
-
+        
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1523,9 +1493,9 @@ async function getUserActiveChat(userId) {
             .eq('user_id', userId)
             .eq('status', 'active')
             .maybeSingle();
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1549,9 +1519,9 @@ async function addActivity(activityData) {
             }])
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1572,7 +1542,7 @@ async function addProfitActivity(userId, amount, packageName) {
 
 async function addWithdrawalActivity(userId, amount, status) {
     let title, description;
-
+    
     if (status === 'pending') {
         title = '💰 طلب سحب';
         description = `طلب سحب بقيمة ${amount}$ قيد المراجعة`;
@@ -1586,7 +1556,7 @@ async function addWithdrawalActivity(userId, amount, status) {
         title = '❌ رفض طلب السحب';
         description = `تم رفض طلب السحب بقيمة ${amount}$`;
     }
-
+    
     return addActivity({
         userId: userId,
         type: 'withdrawal',
@@ -1599,7 +1569,7 @@ async function addWithdrawalActivity(userId, amount, status) {
 
 async function addSubscriptionActivity(userId, amount, packageName, status) {
     let title, description;
-
+    
     if (status === 'pending') {
         title = '📦 طلب اشتراك';
         description = `طلب اشتراك في باقة ${packageName} بقيمة ${amount}$ قيد المراجعة`;
@@ -1610,7 +1580,7 @@ async function addSubscriptionActivity(userId, amount, packageName, status) {
         title = '❌ رفض طلب الاشتراك';
         description = `تم رفض طلب اشتراكك في باقة ${packageName}`;
     }
-
+    
     return addActivity({
         userId: userId,
         type: 'subscription',
@@ -1639,9 +1609,9 @@ async function getUserActivities(userId, limit = 50) {
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(limit);
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1657,9 +1627,9 @@ async function getUserActivitiesByType(userId, type, limit = 50) {
             .eq('type', type)
             .order('created_at', { ascending: false })
             .limit(limit);
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1682,9 +1652,9 @@ async function addGlobalAlert(alertData) {
             }])
             .select()
             .single();
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1694,16 +1664,16 @@ async function addGlobalAlert(alertData) {
 async function getActiveAlerts() {
     try {
         const now = new Date().toISOString();
-
+        
         const { data, error } = await supabaseClient
             .from('global_alerts')
             .select('*')
             .eq('is_active', true)
             .or(`expires_at.is.null,expires_at.gt.${now}`)
             .order('created_at', { ascending: false });
-
+        
         if (error) throw error;
-
+        
         return { success: true, data };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1716,9 +1686,9 @@ async function disableAlert(alertId) {
             .from('global_alerts')
             .update({ is_active: false })
             .eq('id', alertId);
-
+        
         if (error) throw error;
-
+        
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -1731,304 +1701,10 @@ async function deleteAlert(alertId) {
             .from('global_alerts')
             .delete()
             .eq('id', alertId);
-
-        if (error) throw error;
-
-        return { success: true };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-// ========== دوال جديدة: نظام الرهان (Betting) ==========
-
-/**
- * إنشاء رهان جديد
- * @param {Object} betData { userId, matchId, predictedResult (home, draw, away), amount }
- */
-async function createBet(betData) {
-    try {
-        const { data: user } = await supabaseClient
-            .from('users')
-            .select('balance, status, is_suspended')
-            .eq('id', betData.userId)
-            .single();
-
-        // التحقق من حالة المستخدم
-        if (user.status === 'suspended' || user.status === 'banned' || user.is_suspended) {
-            throw new Error('حسابك غير نشط ولا يمكنك الرهان');
-        }
-        if (betData.amount < 5) {
-            throw new Error('الحد الأدنى للرهان هو 5$');
-        }
-        if (user.balance < betData.amount) {
-            throw new Error('الرصيد غير كافي');
-        }
-
-        // خصم المبلغ من رصيد المستخدم فوراً
-        const { error: updateError } = await supabaseClient
-            .from('users')
-            .update({ balance: user.balance - betData.amount })
-            .eq('id', betData.userId);
-        if (updateError) throw updateError;
-
-        // إضافة سجل الرهان
-        const { data: newBet, error } = await supabaseClient
-            .from('bets')
-            .insert([{
-                user_id: betData.userId,
-                match_id: betData.matchId,
-                predicted_result: betData.predictedResult,
-                amount: betData.amount,
-                possible_win: betData.amount * 2, // x2
-                status: 'pending',
-                created_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-
-        if (error) throw error;
-
-        // تسجيل النشاط
-        await addActivity({
-            userId: betData.userId,
-            type: 'bet',
-            title: '🎲 رهان جديد',
-            description: `رهان بمبلغ ${betData.amount}$ على المباراة`,
-            amount: betData.amount,
-            status: 'pending'
-        });
-
-        return { success: true, data: newBet };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * جلب رهانات مستخدم معين
- */
-async function getUserBets(userId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('bets')
-            .select('*, matches:match_id(*)')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * جلب جميع الرهانات (للوحة الإدارة)
- */
-async function getAllBets() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('bets')
-            .select('*, users:user_id(name, email), matches:match_id(*)')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * تحديث نتيجة رهان (للمسؤول)
- */
-async function updateBetResult(betId, actualResult, adminId) {
-    try {
-        const { data: bet, error: fetchError } = await supabaseClient
-            .from('bets')
-            .select('*')
-            .eq('id', betId)
-            .single();
-        if (fetchError) throw fetchError;
-
-        let newStatus = 'lost';
-        let winAmount = 0;
-
-        if (bet.predicted_result === actualResult) {
-            newStatus = 'won';
-            winAmount = bet.possible_win;
-
-            // إضافة المبلغ الفائز إلى رصيد المستخدم
-            const { data: user } = await supabaseClient
-                .from('users')
-                .select('balance')
-                .eq('id', bet.user_id)
-                .single();
-
-            await supabaseClient
-                .from('users')
-                .update({ balance: user.balance + winAmount })
-                .eq('id', bet.user_id);
-        }
-
-        // تحديث حالة الرهان
-        const { error: updateError } = await supabaseClient
-            .from('bets')
-            .update({
-                status: newStatus,
-                actual_result: actualResult,
-                processed_by: adminId,
-                processed_at: new Date().toISOString()
-            })
-            .eq('id', betId);
-        if (updateError) throw updateError;
-
-        // تسجيل النشاط
-        await addActivity({
-            userId: bet.user_id,
-            type: 'bet',
-            title: newStatus === 'won' ? '🎉 فوز بالرهان' : '😞 خسارة رهان',
-            description: `نتيجة الرهان: ${newStatus === 'won' ? 'فوز +' + winAmount + '$' : 'خسارة'}`,
-            amount: winAmount || bet.amount,
-            status: newStatus
-        });
-
-        return { success: true, data: { newStatus, winAmount } };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-// ========== دوال جديدة: نظام الألعاب (Games) ==========
-
-/**
- * لعب لعبة الحظ (مثل تخمين رقم عالي/منخفض)
- * @param {Object} gameData { userId, amount, betType ('high' or 'low') }
- */
-async function playGame(gameData) {
-    try {
-        const { data: user } = await supabaseClient
-            .from('users')
-            .select('balance, status, is_suspended')
-            .eq('id', gameData.userId)
-            .single();
-
-        // التحقق من حالة المستخدم
-        if (user.status === 'suspended' || user.status === 'banned' || user.is_suspended) {
-            throw new Error('حسابك غير نشط ولا يمكنك اللعب');
-        }
-        if (gameData.amount < 1) {
-            throw new Error('الحد الأدنى للعب هو 1$');
-        }
-        if (user.balance < gameData.amount) {
-            throw new Error('الرصيد غير كافي');
-        }
-
-        // خصم المبلغ من رصيد المستخدم
-        const { error: updateError } = await supabaseClient
-            .from('users')
-            .update({ balance: user.balance - gameData.amount })
-            .eq('id', gameData.userId);
-        if (updateError) throw updateError;
-
-        // منطق اللعبة (تخمين الرقم)
-        const winningNumber = Math.floor(Math.random() * 100) + 1; // رقم عشوائي من 1 إلى 100
-        const userGuess = Math.floor(Math.random() * 100) + 1; // المستخدم "يختار" رقماً عشوائي
         
-        // تحديد نسبة الفوز بناءً على المبلغ
-        let winChance = 0.5 - (gameData.amount / 2000); // تبدأ من 50% وتقل كلما زاد المبلغ
-        winChance = Math.max(0.1, Math.min(0.5, winChance)); // لا تقل عن 10% ولا تزيد عن 50%
-
-        const isWin = Math.random() < winChance; // هل فاز المستخدم؟
-
-        let newStatus = 'lost';
-        let winAmount = 0;
-
-        if (isWin) {
-            newStatus = 'won';
-            winAmount = gameData.amount * 2; // x2
-
-            // إضافة المبلغ الفائز إلى رصيد المستخدم
-            await supabaseClient
-                .from('users')
-                .update({ balance: user.balance - gameData.amount + winAmount }) // استعدنا المبلغ المضاعف
-                .eq('id', gameData.userId);
-        }
-
-        // إضافة سجل اللعبة
-        const { data: newGame, error } = await supabaseClient
-            .from('games')
-            .insert([{
-                user_id: gameData.userId,
-                amount: gameData.amount,
-                win_chance: winChance,
-                winning_number: winningNumber,
-                user_guess: userGuess,
-                is_win: isWin,
-                status: newStatus,
-                created_at: new Date().toISOString()
-            }])
-            .select()
-            .single();
-
         if (error) throw error;
-
-        // تسجيل النشاط
-        await addActivity({
-            userId: gameData.userId,
-            type: 'game',
-            title: isWin ? '🎰 فوز في اللعبة' : '🎰 خسارة في اللعبة',
-            description: `لعبة الحظ: ${isWin ? 'فوز +' + winAmount + '$' : 'خسارة ' + gameData.amount + '$'}`,
-            amount: winAmount || gameData.amount,
-            status: newStatus
-        });
-
-        return { 
-            success: true, 
-            data: {
-                ...newGame,
-                isWin,
-                winAmount: isWin ? winAmount : 0,
-                userGuess,
-                winningNumber
-            }
-        };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * جلب ألعاب مستخدم معين
- */
-async function getUserGames(userId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('games')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return { success: true, data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-/**
- * جلب جميع الألعاب (للوحة الإدارة)
- */
-async function getAllGames() {
-    try {
-        const { data, error } = await supabaseClient
-            .from('games')
-            .select('*, users:user_id(name, email)')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return { success: true, data };
+        
+        return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
     }
@@ -2040,7 +1716,7 @@ initSupabase();
 // ========== تصدير الدوال ==========
 window.supabaseClient = supabaseClient;
 window.supabaseHelpers = {
-    // ... (keep all existing helpers) ...
+    // المستخدمين
     registerUser,
     loginUser,
     getUserById,
@@ -2048,44 +1724,55 @@ window.supabaseHelpers = {
     getAllUsers,
     updateUserStatus,
     
+    // الباقات
     getAllPackages,
     getPackageById,
     createPackage,
     updatePackage,
     deletePackage,
     
+    // طلبات الاشتراك
     createPendingPackage,
     getPendingPackages,
     approvePendingPackage,
     rejectPendingPackage,
     
+    // الإحالة
     generateReferralCode,
     getReferralStats,
     
+    // الاشتراكات
     getUserSubscription,
     
+    // نظام المطالبة بالأرباح
     claimDailyProfit,
     getClaimStatus,
     
+    // السحب
     createWithdrawal,
     getUserWithdrawals,
     getAllWithdrawals,
     getPendingWithdrawals,
     updateWithdrawalStatus,
     
+    // المعاملات
     getUserTransactions,
     getAllTransactions,
     
+    // الهدايا
     sendGift,
     getUserGifts,
     claimGift,
     getAllGifts,
     
+    // الإحصائيات
     getDashboardStats,
     
+    // الصور
     uploadChatImage,
     getChatImage,
     
+    // نظام الدردشة
     startLiveChat,
     sendChatMessage,
     getChatMessages,
@@ -2096,6 +1783,7 @@ window.supabaseHelpers = {
     closeChat,
     getUserActiveChat,
     
+    // نظام سجل النشاطات
     addActivity,
     addProfitActivity,
     addWithdrawalActivity,
@@ -2104,21 +1792,11 @@ window.supabaseHelpers = {
     getUserActivities,
     getUserActivitiesByType,
     
+    // نظام التنبيهات العامة
     addGlobalAlert,
     getActiveAlerts,
     disableAlert,
-    deleteAlert,
-    
-    // NEW: Betting System
-    createBet,
-    getUserBets,
-    getAllBets,
-    updateBetResult,
-    
-    // NEW: Games System
-    playGame,
-    getUserGames,
-    getAllGames
+    deleteAlert
 };
 
-console.log('✅ تم تحميل جميع دوال Supabase مع أنظمة الرهان والألعاب الجديدة');
+console.log('✅ تم تحميل جميع دوال Supabase مع نظام منع التكرار');
